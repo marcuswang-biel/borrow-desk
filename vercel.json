@@ -4,5 +4,10 @@
 	"installCommand": "pnpm install",
 	"buildCommand": "pnpm --filter @borrow-desk/frontend build",
 	"outputDirectory": "packages/frontend/dist",
+	"functions": {
+		"api/**/*.ts": {
+			"includeFiles": "packages/api/**"
+		}
+	},
 	"rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
 }
