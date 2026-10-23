@@ -1,0 +1,29 @@
+packages:
+  - packages/*
+
+catalog:
+  '@effect/platform-node': 4.0.6
+  '@effect/sql-pg': 4.0.6
+  '@types/node': 25.9.9
+  effect: 4.0.6
+  '@types/react': 19.3.0
+  '@types/react-dom': 19.3.0
+  react: 19.3.1
+  react-dom: 19.3.1
+  oxfmt: 0.74.0
+  oxlint: 1.89.0
+  '@tailwindcss/vite': 4.3.3
+  '@vitejs/plugin-react': 6.1.2
+  tailwindcss: 4.3.3
+  vite: 8.3.5
+  jose: 6.2.13
+  '@neondatabase/auth': 0.7.0-beta
+
+allowBuilds:
+  core-js: false
+
+minimumReleaseAgeExclude:
+  - effect@4.0.6
+  - '@effect/platform-node@4.0.6'
+  - '@effect/sql-pg@4.0.6'
+  - '@neondatabase/auth@0.7.0-beta'

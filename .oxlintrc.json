@@ -1,0 +1,26 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "react", "import"],
+	"categories": {
+		"correctness": "error"
+	},
+	"ignorePatterns": ["**/node_modules/**", "**/dist/**", "**/.pnpm-store/**"],
+	"overrides": [
+		{
+			"files": ["packages/api/**/*.ts"],
+			"rules": {
+				"no-restricted-imports": [
+					"error",
+					{
+						"patterns": [
+							{
+								"group": ["@effect/*", "@neondatabase/*", "react", "react-dom", "jose"],
+								"message": "packages/api only imports effect"
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}
