@@ -27,6 +27,7 @@
 	"devDependencies": {
 		"oxfmt": "catalog:",
 		"oxlint": "catalog:",
+		"turbo": "catalog:",
 		"typescript": "7.0.2"
 	},
 	"packageManager": "pnpm@12.15.0"

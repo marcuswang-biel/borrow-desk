@@ -57,48 +57,33 @@ if (
 console.log('api  http://localhost:3000');
 console.log('web  http://localhost:5173');
 
-/** Environment passed to both child processes. */
+/** Environment passed to Turbo. Values from .env.development win over the shell. */
 const childEnv = { ...process.env, ...env };
-/** API process. */
-const backend = spawn(
-	process.execPath,
-	['--env-file=.env.development', 'packages/backend/src/main.ts'],
+/** Turbo runs the backend and frontend dev scripts and keeps both alive. */
+const turbo = spawn(
+	'node_modules/.bin/turbo',
+	['dev', '--filter=@borrow-desk/backend', '--filter=@borrow-desk/frontend'],
 	{
 		stdio: 'inherit',
 		env: childEnv,
 	},
 );
-/** Page process. Vite proxies /api to the API process. */
-const frontend = spawn('node_modules/.bin/vite', ['--port', '5173', '--strictPort'], {
-	cwd: 'packages/frontend',
-	stdio: 'inherit',
-	env: childEnv,
-});
 
-/** Stops both processes. */
+/** True after the first stop signal has been forwarded to Turbo. */
+let stopping = false;
+
+/** Forwards one stop signal so Turbo can shut both tasks down. */
 const stop = () => {
-	backend.kill('SIGTERM');
-	frontend.kill('SIGTERM');
+	if (stopping) {
+		return;
+	}
+	stopping = true;
+	turbo.kill('SIGINT');
 };
 
-process.on('SIGINT', () => {
-	stop();
-	process.exit(0);
-});
-process.on('SIGTERM', () => {
-	stop();
-	process.exit(0);
-});
+process.on('SIGINT', stop);
+process.on('SIGTERM', stop);
 
-backend.on('exit', (code) => {
-	if (code !== 0 && code !== null) {
-		frontend.kill('SIGTERM');
-		process.exit(code);
-	}
-});
-frontend.on('exit', (code) => {
-	if (code !== 0 && code !== null) {
-		backend.kill('SIGTERM');
-		process.exit(code);
-	}
+turbo.on('exit', (code) => {
+	process.exit(code ?? 0);
 });

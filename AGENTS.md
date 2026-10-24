@@ -14,7 +14,7 @@ This repository does not use Convex. The backend is Effect v4.
 
 ## Commands
 
-`pnpm dev` starts both the API on port 3000 and the page on port 5173. The page proxies `/api` to the API so the session cookie stays on one origin.
+`pnpm dev` checks the local environment, then Turbo starts the API on port 3000 and the page on port 5173. The page proxies `/api` to the API so the session cookie stays on one origin.
 
 `pnpm test` runs the overlap, permission, and overdue tests with in-memory repositories.
 

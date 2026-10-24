@@ -18,6 +18,7 @@ catalog:
   '@vitejs/plugin-react': 6.1.2
   tailwindcss: 4.3.3
   vite: 8.3.5
+  turbo: 2.10.12
   jose: 6.2.13
   '@neondatabase/auth': 0.7.0-beta
   better-auth: 1.7.6
