@@ -1,7 +1,8 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"outDir": "dist",
+		"outDir": "build",
+		"tsBuildInfoFile": "build/tsconfig.tsbuildinfo",
 		"rootDir": "src",
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"jsx": "react-jsx",

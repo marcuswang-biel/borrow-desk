@@ -1,13 +1,22 @@
-import { createAuthClient, type VanillaBetterAuthClient } from '@neondatabase/auth';
-import { BetterAuthVanillaAdapter } from '@neondatabase/auth/vanilla';
+import { createAuthClient } from 'better-auth/client';
 
-const authUrl = import.meta.env.VITE_NEON_AUTH_URL;
-if (authUrl.length === 0) {
-	throw new Error('Missing VITE_NEON_AUTH_URL');
-}
+/** Better Auth base URL. The dev server and production site both serve /api/auth. */
+const authUrl = `${window.location.origin}/api/auth`;
 
-export const authClient: VanillaBetterAuthClient = createAuthClient(authUrl, {
-	adapter: BetterAuthVanillaAdapter({
-		fetchOptions: { credentials: 'include' }
-	})
+/** Browser client for email sign-in and sign-up. */
+export const authClient = createAuthClient({
+	baseURL: authUrl,
+	fetchOptions: {
+		credentials: 'include',
+	},
 });
+
+/** Reads a JWT from the Better Auth session cookie. */
+export const sessionToken = async (): Promise<string | undefined> => {
+	const response = await fetch(`${authUrl}/token`, { credentials: 'include' });
+	if (!response.ok) {
+		return undefined;
+	}
+	const body = (await response.json()) as { token?: string };
+	return typeof body.token === 'string' && body.token.length > 0 ? body.token : undefined;
+};

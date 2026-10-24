@@ -10,12 +10,12 @@
 		"@borrow-desk/api": "workspace:*",
 		"@tailwindcss/vite": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
+		"better-auth": "catalog:",
 		"effect": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"tailwindcss": "catalog:",
-		"vite": "catalog:",
-		"@neondatabase/auth": "catalog:"
+		"vite": "catalog:"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",

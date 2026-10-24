@@ -6,7 +6,7 @@
 	"outputDirectory": "packages/frontend/dist",
 	"functions": {
 		"api/**/*.ts": {
-			"includeFiles": "packages/api/**"
+			"includeFiles": ["packages/api/**", "packages/backend/src/sql/migrations/**"]
 		}
 	},
 	"rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]

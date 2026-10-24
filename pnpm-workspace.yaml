@@ -4,6 +4,8 @@ packages:
 catalog:
   '@effect/platform-node': 4.0.6
   '@effect/sql-pg': 4.0.6
+  '@effect/vitest': 4.0.6
+  vitest: 5.0.5
   '@types/node': 25.9.9
   effect: 4.0.6
   '@types/react': 19.3.0
@@ -18,12 +20,21 @@ catalog:
   vite: 8.3.5
   jose: 6.2.13
   '@neondatabase/auth': 0.7.0-beta
+  better-auth: 1.7.6
+  pg: 8.23.1
+  '@types/pg': 8.23.1
 
 allowBuilds:
   core-js: false
+  esbuild: set this to true or false
 
 minimumReleaseAgeExclude:
   - effect@4.0.6
   - '@effect/platform-node@4.0.6'
   - '@effect/sql-pg@4.0.6'
+  - '@effect/vitest@4.0.6'
+  - vitest@5.0.5
   - '@neondatabase/auth@0.7.0-beta'
+  - better-auth@1.7.6
+  - pg@8.23.1
+  - '@types/pg@8.23.1'

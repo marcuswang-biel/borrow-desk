@@ -1,10 +1,25 @@
 {
 	"name": "borrow-desk",
+	"version": "1.0.0",
 	"private": true,
+	"description": "",
+	"keywords": [],
+	"homepage": "https://github.com/marcuswang-biel/borrow-desk#readme",
+	"bugs": {
+		"url": "https://github.com/marcuswang-biel/borrow-desk/issues"
+	},
+	"license": "ISC",
+	"author": "",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/marcuswang-biel/borrow-desk.git"
+	},
 	"type": "module",
+	"main": "index.js",
 	"scripts": {
 		"setup": "node scripts/setup-env.mjs",
 		"dev": "node scripts/dev.mjs",
+		"test": "pnpm --filter @borrow-desk/backend test",
 		"fmt": "oxfmt",
 		"fmt:check": "oxfmt --check",
 		"lint": "oxlint"

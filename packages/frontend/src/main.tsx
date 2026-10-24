@@ -1,17 +1,17 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { HealthPage } from './health.tsx';
+import { DeskPage } from './desk.tsx';
 import './styles.css';
 
-const root = document.getElementById('root');
-
+/** Page root. The document must contain #root. */
+const root = document.querySelector('#root');
 if (root === null) {
-	throw new Error('缺少 #root');
+	throw new Error('Missing #root');
 }
 
 createRoot(root).render(
 	<StrictMode>
-		<HealthPage />
+		<DeskPage />
 	</StrictMode>,
 );

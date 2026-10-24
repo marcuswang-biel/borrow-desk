@@ -2,14 +2,22 @@
 	"name": "@borrow-desk/backend",
 	"private": true,
 	"type": "module",
+	"scripts": {
+		"test": "vitest run"
+	},
 	"dependencies": {
 		"@borrow-desk/api": "workspace:*",
 		"@effect/platform-node": "catalog:",
 		"@effect/sql-pg": "catalog:",
+		"better-auth": "catalog:",
 		"effect": "catalog:",
-		"jose": "catalog:"
+		"jose": "catalog:",
+		"pg": "catalog:"
 	},
 	"devDependencies": {
-		"@types/node": "catalog:"
+		"@effect/vitest": "catalog:",
+		"@types/node": "catalog:",
+		"@types/pg": "catalog:",
+		"vitest": "catalog:"
 	}
 }

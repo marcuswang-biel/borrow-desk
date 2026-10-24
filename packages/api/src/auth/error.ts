@@ -1,9 +1,0 @@
-import * as Schema from 'effect/Schema';
-
-export class Unauthorized extends Schema.TaggedError<Unauthorized>()(
-	'Unauthorized',
-	{
-		message: Schema.String,
-	},
-	{ httpApiStatus: 401 },
-) {}
