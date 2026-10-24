@@ -1,6 +1,7 @@
 node_modules
 node_modules.root
 dist
+build
 *.tsbuildinfo
 .env
 .env.*
