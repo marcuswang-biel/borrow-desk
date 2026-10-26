@@ -1,5 +1,44 @@
 @import 'tailwindcss';
 
-dialog#reminders::backdrop {
-	background: rgb(9 9 11 / 0.2);
+@theme {
+	--color-ground: #eef0ef;
+	--color-surface: #ffffff;
+	--color-raised: #f5f6f5;
+	--color-active: #e3e6e4;
+	--color-line: #e2e5e3;
+	--color-rule: #eceeed;
+	--color-control: #cdced1;
+	--color-ink: #131416;
+	--color-ink-hover: #2a2c2e;
+	--color-muted: #5d5f60;
+	--color-accent: #1b6c80;
+	--color-negative: #c4242a;
+	--color-pill: #ffedea;
+	--color-pill-ink: #831c1e;
+	--font-sans: 'IBM Plex Sans', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+@layer base {
+	body {
+		@apply bg-ground text-ink font-sans text-sm leading-5;
+	}
+
+	h1 {
+		@apply m-0 text-[22px] leading-7 font-semibold tracking-[-0.02em];
+	}
+
+	h2 {
+		@apply m-0 text-base leading-6 font-semibold;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-ink);
+		outline-offset: 2px;
+	}
+
+	::selection {
+		background: #d5e6eb;
+		color: var(--color-ink);
+	}
 }

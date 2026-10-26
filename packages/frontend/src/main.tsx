@@ -1,7 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { DeskPage } from './desk.tsx';
+import './lib/i18n/index.ts';
+import { AppRoutes } from './routes/index.tsx';
 import './styles.css';
 
 /** Page root. The document must contain #root. */
@@ -12,6 +13,6 @@ if (root === null) {
 
 createRoot(root).render(
 	<StrictMode>
-		<DeskPage />
+		<AppRoutes />
 	</StrictMode>,
 );

@@ -1,6 +1,6 @@
 # Borrow Desk
 
-An admin records a piece of equipment. An employee books it for a time range. If that range overlaps an open loan, the API returns `LoanConflict` with the other borrower's name. Once a minute, the API records one note when a loan has ended and is still out. The borrower opens Reminders in the header to read it. The note names the equipment kind and number, and a second scan does not write another note.
+An admin records a piece of equipment. An employee books it for a time range. If that range overlaps an open loan, the API returns `LoanConflict` with the other borrower's name. Once a minute, the API records one note when a loan has ended and is still out. The borrower opens Reminders in the header to read it. The note names the equipment kind and number, and a second scan does not write another note. The page splits that work across a sign-in route, an equipment route, and a loans route. The same chrome can be read in English or Chinese.
 
 ## Local setup
 

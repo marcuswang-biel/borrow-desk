@@ -4,9 +4,6 @@ export { EquipmentHttpLive, EquipmentLive, EquipmentService } from './equipment/
 /** Loan feature. */
 export { LoansService, LoansHttpLive, LoansLive } from './loans/index.ts';
 
-/** Health feature. */
-export { HealthLive } from './health/index.ts';
-
 /** Session feature. */
 export { SessionLive } from './session/index.ts';
 
