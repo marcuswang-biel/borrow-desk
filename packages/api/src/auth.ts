@@ -1,7 +1,7 @@
 import * as Context from 'effect/Context';
 import { HttpApiMiddleware, HttpApiSecurity } from 'effect/http-api';
 
-import { Unauthorized, type User } from './model.ts';
+import { Unauthorized, type User } from './schema/user/index.ts';
 
 /** Signed-in person provided to handlers by the bearer middleware. */
 export class CurrentUser extends Context.Service<CurrentUser, User>()('borrow-desk/CurrentUser') {}

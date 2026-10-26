@@ -10,6 +10,8 @@ import {
 	LoansHttpLive,
 	LoansLive,
 	ReminderScheduleLive,
+	RemindersHttpLive,
+	RemindersLive,
 	SessionLive,
 } from './features/index.ts';
 import { EquipmentRepoSql, LoanRepoSql, ReminderSql } from './repo/index.ts';
@@ -21,6 +23,7 @@ const HttpLive = HttpApiBuilder.layer(Api).pipe(
 	Layer.provide(SessionLive),
 	Layer.provide(EquipmentHttpLive),
 	Layer.provide(LoansHttpLive),
+	Layer.provide(RemindersHttpLive),
 	Layer.provide(AuthenticationLive),
 );
 
@@ -32,7 +35,7 @@ const PersistenceLive = Layer.mergeAll(EquipmentRepoSql, LoanRepoSql, ReminderSq
  * mergeAll does not feed one sibling into another, so the repositories are provided explicitly.
  */
 const DomainLive = Layer.mergeAll(
-	Layer.mergeAll(EquipmentLive, LoansLive).pipe(Layer.provide(PersistenceLive)),
+	Layer.mergeAll(EquipmentLive, LoansLive, RemindersLive).pipe(Layer.provide(PersistenceLive)),
 	PersistenceLive,
 );
 

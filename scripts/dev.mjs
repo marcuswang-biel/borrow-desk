@@ -30,7 +30,7 @@ const parseEnv = (text) => {
 };
 
 if (!existsSync('.env.development')) {
-	console.error('Missing .env.development. Copy .env.example and fill in the local database.');
+	console.error('Missing .env.development. Run pnpm setup.');
 	process.exit(1);
 }
 

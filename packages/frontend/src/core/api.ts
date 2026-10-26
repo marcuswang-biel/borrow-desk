@@ -81,6 +81,15 @@ export const borrow = (equipmentId: string, startsAt: number, endsAt: number) =>
 		}),
 	);
 
+/** Loads reminders sent to the signed-in borrower. */
+export const listReminders = () =>
+	run(
+		Effect.gen(function* () {
+			const api = yield* HttpApiClient.make(Api, { baseUrl: window.location.origin });
+			return yield* api.reminders.listReminders();
+		}),
+	);
+
 /** Marks a loan returned. */
 export const returnLoan = (id: string) =>
 	run(

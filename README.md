@@ -1,15 +1,14 @@
 # Borrow Desk
 
-An admin records a piece of equipment. An employee books it for a time range. If that range overlaps an open loan, the API returns `LoanConflict` with the other borrower's name. Once a minute, the API reminds the borrower of any loan that ended and was not returned.
+An admin records a piece of equipment. An employee books it for a time range. If that range overlaps an open loan, the API returns `LoanConflict` with the other borrower's name. Once a minute, the API records one note when a loan has ended and is still out. The borrower opens Reminders in the header to read it. The note names the equipment kind and number, and a second scan does not write another note.
 
 ## Local setup
 
 1. Install pnpm 12 and Node 24.
-2. Copy `.env.example` to `.env.development`.
-3. Point `DATABASE_URL` at a local PostgreSQL database named `borrow_desk`.
-4. Set `ADMIN_EMAIL` to the email you will sign up with. The example uses `ada@example.com`. That account is the admin. Every other account is an employee.
-5. `pnpm install`
-6. `pnpm dev`
+2. `pnpm setup`. It writes `.env.development` and `.env.production` from `.env.example`, keeps values already present, and creates the local `borrow_desk` database.
+3. Set `ADMIN_EMAIL` to the admin addresses, separated by commas. The example uses `ada@example.com,bob@example.com`. Every other account is an employee.
+4. `pnpm install`
+5. `pnpm dev`
 
 That one command starts the API at http://localhost:3000 and the page at http://localhost:5173. Migrations run when the API starts, including the Better Auth tables.
 
@@ -21,4 +20,4 @@ The page and the API deploy together on Vercel. The long-running `pnpm dev` proc
 
 ## Tests
 
-`pnpm test` covers an employee being refused equipment creation, an overlapping loan naming the other person, a touching range being allowed, a missing equipment id, and a single overdue reminder.
+`pnpm test` covers an employee being refused equipment creation, an overlapping loan naming the other person, a touching range being allowed, a missing equipment id, one overdue reminder that names the equipment, and a borrower seeing only their own note.

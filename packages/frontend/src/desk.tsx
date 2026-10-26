@@ -1,6 +1,6 @@
-import type { Equipment, Loan, User } from '@borrow-desk/api';
+import type { Equipment, Loan, ReminderNotice, User } from '@borrow-desk/api';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import {
 	borrow,
@@ -9,6 +9,7 @@ import {
 	getMe,
 	listEquipment,
 	listLoans,
+	listReminders,
 	returnLoan,
 } from './core/api.ts';
 import { authClient } from './core/auth.ts';
@@ -53,16 +54,22 @@ export const DeskPage = () => {
 	const [authError, setAuthError] = useState('');
 	const [equipmentError, setEquipmentError] = useState('');
 	const [loanError, setLoanError] = useState('');
+	const [reminders, setReminders] = useState<ReadonlyArray<ReminderNotice>>([]);
+	const [reminderError, setReminderError] = useState('');
+	const [remindersOpen, setRemindersOpen] = useState(false);
+	const remindersPanel = useRef<HTMLDialogElement>(null);
 
 	const refresh = async () => {
-		const [nextUser, nextEquipment, nextLoans] = await Promise.all([
+		const [nextUser, nextEquipment, nextLoans, nextReminders] = await Promise.all([
 			getMe(),
 			listEquipment(),
 			listLoans(),
+			listReminders(),
 		]);
 		setUser(nextUser);
 		setEquipment(nextEquipment);
 		setLoans(nextLoans);
+		setReminders(nextReminders);
 	};
 
 	const signIn = (event: React.FormEvent<HTMLFormElement>) => {
@@ -116,9 +123,12 @@ export const DeskPage = () => {
 		authClient
 			.signOut()
 			.then(() => {
+				remindersPanel.current?.close();
 				setUser(undefined);
 				setEquipment([]);
 				setLoans([]);
+				setReminders([]);
+				setRemindersOpen(false);
 			})
 			.catch((error: unknown) => {
 				setAuthError(messageOf(error));
@@ -171,19 +181,96 @@ export const DeskPage = () => {
 			});
 	};
 
+	const openReminders = () => {
+		setReminderError('');
+		listReminders()
+			.then((next) => {
+				setReminders(next);
+				setRemindersOpen(true);
+				remindersPanel.current?.showModal();
+			})
+			.catch((error: unknown) => {
+				setReminderError(messageOf(error));
+				setRemindersOpen(true);
+				remindersPanel.current?.showModal();
+			});
+	};
+
 	return (
 		<main className="mx-auto flex min-h-dvh max-w-5xl flex-col gap-8 px-6 py-10">
-			<header className="flex flex-col gap-2">
-				<h1 className="text-3xl font-semibold text-balance">Borrow Desk</h1>
-				<p className="text-pretty text-zinc-600">
-					Record equipment, then book a time. Overlapping bookings name the person who already has
-					it.
-				</p>
-				<p className="text-zinc-700 tabular-nums">Database: {health}</p>
-				<button className="w-fit bg-zinc-950 px-4 py-2 text-white" onClick={check} type="button">
-					Check database
-				</button>
+			<header className="flex items-start justify-between gap-6">
+				<div className="flex flex-col gap-2">
+					<h1 className="text-3xl font-semibold text-balance">Borrow Desk</h1>
+					<p className="text-pretty text-zinc-600">
+						Record equipment, then book a time. Overlapping bookings name the person who already has
+						it. An overdue loan leaves one reminder.
+					</p>
+					<p className="text-zinc-700 tabular-nums">Database: {health}</p>
+					<button className="w-fit bg-zinc-950 px-4 py-2 text-white" onClick={check} type="button">
+						Check database
+					</button>
+				</div>
+				{user === undefined ? null : (
+					<button
+						aria-controls="reminders"
+						aria-expanded={remindersOpen}
+						aria-haspopup="dialog"
+						className="border border-zinc-300 px-3 py-2"
+						onClick={openReminders}
+						type="button"
+					>
+						Reminders <span className="tabular-nums">{reminders.length}</span>
+					</button>
+				)}
 			</header>
+			<dialog
+				aria-labelledby="reminders-title"
+				className="m-0 ml-auto h-dvh max-h-dvh w-full max-w-sm border border-zinc-200 bg-white p-6"
+				id="reminders"
+				onClose={() => {
+					setRemindersOpen(false);
+				}}
+				ref={remindersPanel}
+			>
+				<div className="flex h-full flex-col gap-4">
+					<div className="flex items-start justify-between gap-4">
+						<h2 className="text-xl font-semibold text-balance" id="reminders-title">
+							Reminders
+						</h2>
+						<button
+							autoFocus
+							className="border border-zinc-300 px-3 py-1"
+							onClick={() => {
+								remindersPanel.current?.close();
+							}}
+							type="button"
+						>
+							Close
+						</button>
+					</div>
+					{reminderError.length > 0 ? (
+						<p className="text-pretty text-red-700">{reminderError}</p>
+					) : null}
+					{reminders.length === 0 ? (
+						<p className="text-pretty text-zinc-600">
+							No reminders yet. A note appears here when a loan of yours is still out after its end
+							time.
+						</p>
+					) : (
+						<ul className="flex flex-col gap-3">
+							{reminders.map((notice) => (
+								<li
+									className="flex flex-col gap-1 border border-zinc-200 px-3 py-2"
+									key={notice.loanId}
+								>
+									<p className="text-pretty">{notice.message}</p>
+									<p className="text-zinc-700 tabular-nums">{formatWhen(notice.sentAt)}</p>
+								</li>
+							))}
+						</ul>
+					)}
+				</div>
+			</dialog>
 
 			{user === undefined ? (
 				<form className="flex max-w-md flex-col gap-3" onSubmit={signIn}>

@@ -1,4 +1,11 @@
-export { Api, EquipmentGroup, HealthGroup, LoansGroup, SessionGroup } from './api.ts';
+export {
+	Api,
+	EquipmentGroup,
+	HealthGroup,
+	LoansGroup,
+	RemindersGroup,
+	SessionGroup,
+} from './api/index.ts';
 export { Authentication, CurrentUser } from './auth.ts';
 export {
 	BorrowLoan,
@@ -15,5 +22,5 @@ export {
 	Role,
 	Unauthorized,
 	User,
-	rangesOverlap,
-} from './model.ts';
+} from './schema/index.ts';
+export { rangesOverlap } from './policy/index.ts';

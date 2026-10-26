@@ -11,4 +11,10 @@ export { HealthLive } from './health/index.ts';
 export { SessionLive } from './session/index.ts';
 
 /** Reminder feature. */
-export { ReminderScheduleLive, scanOverdue } from './reminders/index.ts';
+export {
+	ReminderScheduleLive,
+	RemindersHttpLive,
+	RemindersLive,
+	RemindersService,
+	scanOverdue,
+} from './reminders/index.ts';

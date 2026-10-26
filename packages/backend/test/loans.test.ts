@@ -17,6 +17,8 @@ import {
 	EquipmentService,
 	LoansLive,
 	LoansService,
+	RemindersLive,
+	RemindersService,
 	scanOverdue,
 } from '../src/features/index.ts';
 import { Reminder } from '../src/repo/index.ts';
@@ -46,9 +48,16 @@ const bob: User = {
 	role: 'employee',
 };
 
+/** In-memory equipment and loan repositories. */
+const memoryRepos = Layer.mergeAll(EquipmentRepoMemory, LoanRepoMemory);
+
 /** Memory repositories, the use cases, and the reminder outbox. */
-const services = Layer.mergeAll(EquipmentLive, LoansLive, ReminderMemory).pipe(
-	Layer.provide(Layer.mergeAll(EquipmentRepoMemory, LoanRepoMemory)),
+const services = Layer.mergeAll(
+	Layer.mergeAll(EquipmentLive, LoansLive, RemindersLive).pipe(
+		Layer.provide(Layer.mergeAll(memoryRepos, ReminderMemory)),
+	),
+	ReminderMemory,
+	memoryRepos,
 );
 
 /** Runs a program with the memory services and one current user. */
@@ -162,9 +171,31 @@ it.effect('an overdue loan is reminded once', () =>
 		const first = yield* reminder.list();
 		assert.strictEqual(first.length, 1);
 		assert.strictEqual(first[0]?.userId, ada.id);
+		assert.strictEqual(first[0]?.message, 'Ada has not returned Camera 1');
 		yield* scanOverdue;
 		assert.strictEqual((yield* reminder.list()).length, 1);
 		const now = yield* Clock.currentTimeMillis;
 		assert.strictEqual(now > 1_000, true);
+	}).pipe(Effect.provide(services)),
+);
+
+it.effect('a borrower sees only their own reminder', () =>
+	Effect.gen(function* () {
+		const equipment = yield* EquipmentService;
+		const loans = yield* LoansService;
+		const reminders = yield* RemindersService;
+		const camera = yield* equipment
+			.create({ name: 'Camera', code: '1' })
+			.pipe(Effect.provideService(CurrentUser, admin));
+		yield* loans
+			.borrow({ equipmentId: camera.id, startsAt: 0, endsAt: 1_000 })
+			.pipe(Effect.provideService(CurrentUser, ada));
+		yield* TestClock.setTime(2_000);
+		yield* scanOverdue;
+		const mine = yield* reminders.list().pipe(Effect.provideService(CurrentUser, ada));
+		const others = yield* reminders.list().pipe(Effect.provideService(CurrentUser, bob));
+		assert.strictEqual(mine.length, 1);
+		assert.strictEqual(mine[0]?.message, 'Ada has not returned Camera 1');
+		assert.strictEqual(others.length, 0);
 	}).pipe(Effect.provide(services)),
 );

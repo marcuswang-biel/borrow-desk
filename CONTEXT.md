@@ -20,7 +20,7 @@ A note sent once to the borrower after the end instant, if the loan is still ope
 
 ## Admin
 
-The account whose email matches `ADMIN_EMAIL`. Only an admin records equipment. An admin may also return someone else's loan.
+An account whose email is listed in `ADMIN_EMAIL`. Several addresses can be listed, separated by commas. Only an admin records equipment. An admin may also return someone else's loan.
 
 ## Employee
 

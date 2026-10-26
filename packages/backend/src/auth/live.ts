@@ -8,22 +8,31 @@ import * as jose from 'jose';
 /** Public origin Better Auth prints into the token, and the browser uses for cookies. */
 const publicOrigin = Config.String('AUTH_PUBLIC_URL');
 
-/** Email that is treated as admin. Everyone else is an employee. */
-const adminEmail = Config.String('ADMIN_EMAIL').pipe(Config.withDefault(''));
+/** Admin addresses from ADMIN_EMAIL. Separate several addresses with commas. */
+const adminEmails = Config.String('ADMIN_EMAIL').pipe(Config.withDefault(''));
 
 /** Port of this API process, used to fetch its own JWKS without leaving the machine. */
 const port = Config.Port('PORT');
 
-/** Decides the role from the admin email, ignoring case. */
-const roleFor = (email: string, admin: string): Role =>
-	admin.length > 0 && email.toLowerCase() === admin.toLowerCase() ? 'admin' : 'employee';
+/** Splits a comma-separated admin list and keeps each address in lower case. */
+const adminSet = (value: string): ReadonlySet<string> =>
+	new Set(
+		value
+			.split(',')
+			.map((email) => email.trim().toLowerCase())
+			.filter((email) => email.length > 0),
+	);
+
+/** Decides the role from the admin list, ignoring case. */
+const roleFor = (email: string, admins: ReadonlySet<string>): Role =>
+	admins.has(email.toLowerCase()) ? 'admin' : 'employee';
 
 /** Verifies bearer tokens from this process's Better Auth JWKS. */
 export const AuthenticationLive = Layer.effect(
 	Authentication,
 	Effect.gen(function* () {
 		const origin = yield* publicOrigin;
-		const admin = yield* adminEmail;
+		const admins = adminSet(yield* adminEmails);
 		const apiPort = yield* port;
 		const appEnv = yield* Config.Literals(['development', 'production'], 'APP_ENV');
 		const jwksUrl =
@@ -58,7 +67,7 @@ export const AuthenticationLive = Layer.effect(
 						id: claims.sub,
 						email: claims.email,
 						name: claims.name,
-						role: roleFor(claims.email, admin),
+						role: roleFor(claims.email, admins),
 					});
 				}),
 		});

@@ -27,7 +27,7 @@ catalog:
 
 allowBuilds:
   core-js: false
-  esbuild: set this to true or false
+  esbuild: true
 
 minimumReleaseAgeExclude:
   - effect@4.0.6
