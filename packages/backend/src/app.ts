@@ -1,34 +1,14 @@
-import { Api } from '@borrow-desk/api';
-import * as HttpApiBuilder from 'effect/http-api/HttpApiBuilder';
 import * as Layer from 'effect/Layer';
 
-import { AuthenticationLive, BetterAuthLive } from './auth/index.ts';
+import { BetterAuthLive } from './auth/index.ts';
 import {
-	EquipmentHttpLive,
 	EquipmentLive,
-	HealthLive,
-	LoansHttpLive,
 	LoansLive,
 	ReminderScheduleLive,
-	RemindersHttpLive,
 	RemindersLive,
-	SessionLive,
 } from './features/index.ts';
-import { EquipmentRepoSql, LoanRepoSql, ReminderSql } from './repo/index.ts';
-import { MigratorLive, SqlLive } from './sql/index.ts';
-
-/** Route handlers. Domain services are provided once, beside this layer. */
-const HttpLive = HttpApiBuilder.layer(Api).pipe(
-	Layer.provide(HealthLive),
-	Layer.provide(SessionLive),
-	Layer.provide(EquipmentHttpLive),
-	Layer.provide(LoansHttpLive),
-	Layer.provide(RemindersHttpLive),
-	Layer.provide(AuthenticationLive),
-);
-
-/** SQL-backed repositories, the reminder outbox, and migrations. */
-const PersistenceLive = Layer.mergeAll(EquipmentRepoSql, LoanRepoSql, ReminderSql, MigratorLive);
+import { PersistenceLive, SqlLive } from './sql/index.ts';
+import { HttpLive } from './http.ts';
 
 /**
  * Use cases plus the services they need.

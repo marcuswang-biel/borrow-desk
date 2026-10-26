@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { SqlLive } from './live.ts';
+import { SqlLive } from './sql.ts';
 
 /** Migration files beside this module, used when Node runs the TypeScript source. */
 const besideModule = fileURLToPath(new URL('./migrations', import.meta.url));
