@@ -19,6 +19,7 @@
 	"scripts": {
 		"setup": "node scripts/setup-env.mjs",
 		"dev": "node scripts/dev.mjs",
+		"build": "pnpm --filter @borrow-desk/frontend build",
 		"test": "pnpm --filter @borrow-desk/backend test",
 		"fmt": "oxfmt",
 		"fmt:check": "oxfmt --check",
