@@ -197,7 +197,9 @@ export const Shell = () => {
 					<span>{t('title')}</span>
 				</Link>
 				<div className="flex min-w-0 flex-wrap items-center justify-end gap-3">
-					{status === 'signed-in' && user !== undefined ? <p>{t('signedIn', { name: user.name, role: t(`role.${user.role}`) })}</p>:null}
+					{status === 'signed-in' && user !== undefined ? (
+						<p>{t('signedIn', { name: user.name, role: t(`role.${user.role}`) })}</p>
+					) : null}
 					<select
 						aria-label={t('language')}
 						className={languageSelectBar}
