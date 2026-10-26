@@ -37,7 +37,11 @@ export const BetterAuthLive = Layer.unwrap(
 			return yield* Effect.die(new Error('production requires BETTER_AUTH_SECRET'));
 		}
 		const auth = betterAuth({
-			database: new Pool({ connectionString: databaseUrl }),
+			database: new Pool({
+				connectionString: databaseUrl,
+				max: appEnv === 'production' ? 1 : 10,
+				idleTimeoutMillis: appEnv === 'production' ? 10_000 : 30_000,
+			}),
 			baseURL: origin,
 			basePath: authPath,
 			secret,

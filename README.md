@@ -16,6 +16,8 @@ That one command starts the API at http://localhost:3000 and the page at http://
 
 Production uses a separate Neon pooled database and `AUTH_PUBLIC_URL` of the deployed site. Set `BETTER_AUTH_SECRET` there. Do not point `.env.development` at Neon.
 
+Follow [the Neon + Vercel deployment guide](docs/deploy-neon-vercel.md) for the required environment variables and verification steps.
+
 The page and the API deploy together on Vercel. The long-running `pnpm dev` process runs the reminder `Schedule`. A Vercel function does not keep that fiber alive; run the same `scanOverdue` from a scheduler if you need production reminders.
 
 ## Tests

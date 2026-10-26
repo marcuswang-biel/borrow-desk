@@ -11,7 +11,7 @@ const publicOrigin = Config.String('AUTH_PUBLIC_URL');
 /** Admin addresses from ADMIN_EMAIL. Separate several addresses with commas. */
 const adminEmails = Config.String('ADMIN_EMAIL').pipe(Config.withDefault(''));
 
-/** Port of this API process, used to fetch its own JWKS without leaving the machine. */
+/** Port of the local API process, used only outside Vercel's fetch handler. */
 const port = Config.Port('PORT');
 
 /** Splits a comma-separated admin list and keeps each address in lower case. */
@@ -33,12 +33,14 @@ export const AuthenticationLive = Layer.effect(
 	Effect.gen(function* () {
 		const origin = yield* publicOrigin;
 		const admins = adminSet(yield* adminEmails);
-		const apiPort = yield* port;
 		const appEnv = yield* Config.Literals(['development', 'production'], 'APP_ENV');
-		const jwksUrl =
-			appEnv === 'development'
-				? `http://127.0.0.1:${apiPort}/api/auth/jwks`
-				: `${origin.replace(/\/$/, '')}/api/auth/jwks`;
+		let jwksUrl: string;
+		if (appEnv === 'development') {
+			const apiPort = yield* port;
+			jwksUrl = `http://127.0.0.1:${apiPort}/api/auth/jwks`;
+		} else {
+			jwksUrl = `${origin.replace(/\/$/, '')}/api/auth/jwks`;
+		}
 		const jwks = jose.createRemoteJWKSet(new URL(jwksUrl));
 		return Authentication.of({
 			bearer: (httpEffect, { credential }) =>
