@@ -1,14 +1,9 @@
 import * as Layer from 'effect/Layer';
 
 import { BetterAuthLive } from './auth/index.ts';
-import {
-	EquipmentLive,
-	LoansLive,
-	ReminderScheduleLive,
-	RemindersLive,
-} from './features/index.ts';
-import { PersistenceLive, SqlLive } from './sql/index.ts';
+import { EquipmentLive, LoansLive, ReminderScheduleLive, RemindersLive } from './features/index.ts';
 import { HttpLive } from './http.ts';
+import { PersistenceLive, SqlLive } from './sql/index.ts';
 
 /**
  * Use cases plus the services they need.

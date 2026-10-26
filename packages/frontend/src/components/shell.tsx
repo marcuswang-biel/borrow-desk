@@ -145,7 +145,6 @@ export const Shell = () => {
 	const account =
 		status === 'signed-in' && user !== undefined ? (
 			<div className="mt-auto flex flex-col gap-2 px-2 [&_p]:m-0">
-				<p>{t('signedIn', { name: user.name, role: t(`role.${user.role}`) })}</p>
 				<button
 					aria-busy={signingOut}
 					className={btnQuiet}
@@ -198,6 +197,7 @@ export const Shell = () => {
 					<span>{t('title')}</span>
 				</Link>
 				<div className="flex min-w-0 flex-wrap items-center justify-end gap-3">
+					{status === 'signed-in' && user !== undefined ? <p>{t('signedIn', { name: user.name, role: t(`role.${user.role}`) })}</p>:null}
 					<select
 						aria-label={t('language')}
 						className={languageSelectBar}

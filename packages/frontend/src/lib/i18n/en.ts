@@ -3,8 +3,6 @@ import type { Messages } from './messages.ts';
 /** English copy for the desk. */
 export const en = {
 	title: 'Borrow Desk',
-	description:
-		'Record equipment, then book a time. Overlapping bookings name the person who already has it. An overdue loan leaves one reminder.',
 	language: 'Language',
 	menu: 'Menu',
 	navLabel: 'Sections',
@@ -24,13 +22,13 @@ export const en = {
 	close: 'Close',
 	emptyReminders:
 		'No reminders yet. A note appears here when a loan of yours is still out after its end time.',
-	signInPrompt: 'Sign in to see the catalog.',
 	name: 'Name',
 	email: 'Email',
 	password: 'Password',
 	signIn: 'Sign in',
 	signUp: 'Sign up',
-	signedIn: 'Signed in as {{name}} ({{role}}).',
+	accountTabs: 'Sign in or sign up',
+	signedIn: '{{name}} ({{role}})',
 	signOut: 'Sign out',
 	emptyEquipmentAdmin: 'No equipment yet. Record the first piece in the form.',
 	emptyEquipmentEmployee: 'No equipment yet. Ask an admin to record one.',

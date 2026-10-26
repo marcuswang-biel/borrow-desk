@@ -3,7 +3,6 @@ import type { Messages } from './messages.ts';
 /** Chinese copy for the desk. */
 export const zh = {
 	title: '借用台',
-	description: '先登记设备，再预约一段时间。时间重叠时会写明已经借走的人。逾期未还会留下一条提醒。',
 	language: '语言',
 	menu: '菜单',
 	navLabel: '页面',
@@ -22,13 +21,13 @@ export const zh = {
 	remindersTitle: '提醒',
 	close: '关闭',
 	emptyReminders: '还没有提醒。你的借用过了结束时间却还没归还时，会在这里出现一条。',
-	signInPrompt: '登录后才能查看目录。',
 	name: '姓名',
 	email: '邮箱',
 	password: '密码',
 	signIn: '登录',
 	signUp: '注册',
-	signedIn: '当前是 {{name}}（{{role}}）。',
+	accountTabs: '登录或注册',
+	signedIn: '{{name}}（{{role}}）',
 	signOut: '退出',
 	emptyEquipmentAdmin: '还没有设备。请在表单里登记第一件。',
 	emptyEquipmentEmployee: '还没有设备。请让管理员登记一件。',

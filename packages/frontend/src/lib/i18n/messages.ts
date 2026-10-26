@@ -1,7 +1,6 @@
 /** Copy shared by English and Chinese. Interpolation uses i18next `{{name}}` slots. */
 export type Messages = {
 	title: string;
-	description: string;
 	language: string;
 	menu: string;
 	navLabel: string;
@@ -20,12 +19,12 @@ export type Messages = {
 	remindersTitle: string;
 	close: string;
 	emptyReminders: string;
-	signInPrompt: string;
 	name: string;
 	email: string;
 	password: string;
 	signIn: string;
 	signUp: string;
+	accountTabs: string;
 	signedIn: string;
 	signOut: string;
 	emptyEquipmentAdmin: string;

@@ -27,6 +27,17 @@ export const hint = 'm-0 text-xs leading-4 font-normal text-muted';
 /** Sign-in actions, side by side when they fit. */
 export const actions = 'flex flex-wrap gap-3';
 
+/** Track behind the sign-in and sign-up tabs. */
+export const authTabs = 'grid w-full grid-cols-2 gap-1 rounded-md bg-raised p-1';
+
+/** The account tab that is selected. */
+export const authTabOn =
+	'inline-flex min-h-8 cursor-pointer items-center justify-center rounded border border-line bg-surface px-3 text-sm leading-5 font-medium text-ink';
+
+/** An account tab that is not selected. */
+export const authTabOff =
+	'inline-flex min-h-8 cursor-pointer items-center justify-center rounded border border-transparent bg-transparent px-3 text-sm leading-5 font-medium text-muted hover:text-ink';
+
 /** Language control in the top bar. The native arrow is hidden, and the control hides on a phone. */
 export const languageSelectBar =
 	'h-8 w-auto appearance-none rounded-md border border-control bg-surface bg-none px-3 text-sm font-normal text-ink max-md:hidden';
@@ -129,3 +140,5 @@ export const skeletonShort = 'mb-3 h-3.5 w-[72%] rounded bg-active';
 
 /** Shortest placeholder bar. */
 export const skeletonShorter = 'mb-3 h-3.5 w-[48%] rounded bg-active';
+
+export const switchTab = '';
