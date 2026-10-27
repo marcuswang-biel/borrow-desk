@@ -18,9 +18,9 @@
 	"main": "index.js",
 	"scripts": {
 		"setup": "node scripts/setup-env.mjs",
-		"dev": "node scripts/dev.mjs",
+		"dev": "pnpm --filter @borrow-desk/api build && node scripts/dev.mjs",
 		"build": "turbo build",
-		"test": "pnpm --filter @borrow-desk/backend test",
+		"test": "pnpm --filter @borrow-desk/api build && pnpm --filter @borrow-desk/backend test",
 		"fmt": "oxfmt",
 		"fmt:check": "oxfmt --check",
 		"lint": "oxlint"

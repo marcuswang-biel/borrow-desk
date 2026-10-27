@@ -1,14 +1,17 @@
 {
-  "name": "@borrow-desk/api",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./build/index.js"
-  },
-  "scripts": {
+	"name": "@borrow-desk/api",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./build/index.d.ts",
+			"default": "./build/index.js"
+		}
+	},
+	"scripts": {
 		"build": "tsc -p tsconfig.build.json"
 	},
-  "dependencies": {
-    "effect": "catalog:"
-  }
+	"dependencies": {
+		"effect": "catalog:"
+	}
 }

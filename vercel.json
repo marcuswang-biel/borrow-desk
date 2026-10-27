@@ -4,12 +4,6 @@
 	"installCommand": "pnpm install",
 	"buildCommand": "pnpm build",
 	"outputDirectory": "packages/frontend/dist",
-	"functions": {
-		"api/**/*.ts": {
-			"includeFiles": "packages/**",
-			"excludeFiles": "packages/frontend/**"
-		}
-	},
 	"rewrites": [
 		{
 			"source": "/api/(.*)",

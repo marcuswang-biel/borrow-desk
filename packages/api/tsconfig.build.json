@@ -1,11 +1,11 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "build",
-    "tsBuildInfoFile": "build/tsconfig.build.tsbuildinfo",
-    "rootDir": "src",
-    "emitDeclarationOnly": false,
-    "rewriteRelativeImportExtensions": true
-  },
-  "include": ["src"]
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"outDir": "build",
+		"tsBuildInfoFile": "build/tsconfig.build.tsbuildinfo",
+		"rootDir": "src",
+		"emitDeclarationOnly": false,
+		"rewriteRelativeImportExtensions": true
+	},
+	"include": ["src"]
 }
