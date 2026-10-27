@@ -6,7 +6,7 @@ Borrow Desk is the reference shape for later Effect services. The backend is Eff
 
 SQLite would make the first clone easier, and the http-server example supports it, but production needs a hosted Postgres. Neon is the hosted Postgres: it has a free tier, a pooled connection for serverless, and it stays a normal Postgres so `@effect/sql-pg` and SQL migrations work unchanged. Local development uses a Postgres on the machine, never the Neon URL. The process dies if development sees a Neon host or production sees a local host.
 
-Migrations are Effect SQL files in `packages/backend/src/sql/migrations`, named `<YYYYMMDDNN>_<name>.ts` and loaded from that directory when the API starts. A fresh clone only needs a database and `pnpm dev`.
+Migrations are Effect SQL files in `packages/backend/src/sql/migrations`, named `<YYYYMMDDNN>_<name>.ts` and listed in that directory's `index.ts`. They are static imports, so a serverless bundle contains them without reading the filesystem. A fresh clone only needs a database and `pnpm dev`.
 
 ## Auth
 

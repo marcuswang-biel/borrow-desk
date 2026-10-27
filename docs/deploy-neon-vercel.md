@@ -28,6 +28,10 @@ In Vercel, open the **borrow-desk** project → **Settings** → **Environment V
 
 Do not set `DATABASE_URL` to the direct (non-pooler) Neon endpoint. The serverless app validates that the host is a Neon pooler. `PORT` is for local development and is not required by the Vercel fetch handler after the authentication startup fix. `NEON_AUTH_BASE_URL` and `VITE_NEON_AUTH_URL` are not used by this application; it uses its own Better Auth setup.
 
+## Routing `/api` on Vercel
+
+Vercel's filesystem routing for a plain `api` directory only fills one dynamic segment; it does not support Next.js-style catch-all routes. The first rewrite in `vercel.json` therefore sends every `/api` request to `api/[...path].ts`, which exports the Web Handler shape `{ fetch }`. Keep that rewrite before the page rewrite. The handler sees the original URL, so Better Auth and the Effect HTTP router continue to match their normal paths.
+
 ## 3. Redeploy after saving variables
 
 Vercel does not retroactively apply environment-variable changes to an existing deployment. After saving the variables, open **Deployments** and redeploy the latest production deployment, or push a commit to the configured production branch. Ensure the deployment uses the Production environment and finishes successfully.

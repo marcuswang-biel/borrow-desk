@@ -1,20 +1,23 @@
-
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "installCommand": "pnpm install",
-  "buildCommand": "pnpm build",
-  "outputDirectory": "packages/frontend/dist",
-  "functions": {
-    "api/**/*.ts": {
-      "includeFiles": "packages/**",
-      "excludeFiles": "packages/frontend/**"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
-  ]
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": "vite",
+	"installCommand": "pnpm install",
+	"buildCommand": "pnpm build",
+	"outputDirectory": "packages/frontend/dist",
+	"functions": {
+		"api/**/*.ts": {
+			"includeFiles": "packages/**",
+			"excludeFiles": "packages/frontend/**"
+		}
+	},
+	"rewrites": [
+		{
+			"source": "/api/(.*)",
+			"destination": "/api/[...path]"
+		},
+		{
+			"source": "/((?!api/).*)",
+			"destination": "/index.html"
+		}
+	]
 }
