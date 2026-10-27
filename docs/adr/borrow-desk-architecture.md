@@ -1,7 +1,5 @@
 # Borrow Desk architecture and platform choices
 
-Status: accepted · 2026-10-27
-
 ## Context
 
 Borrow Desk is an equipment-lending app. An admin records equipment; a signed-in employee books one piece for a half-open time range. Overlapping open loans fail with `LoanConflict`, which names the earlier borrower. A loan that ends without a return produces one reminder for its borrower. The project is a from-scratch Effect v4 application: shared Schema and HttpApi, tagged errors in signatures, replaceable database, clock, and reminder services, SQL migrations, a scheduled overdue scan, and `@effect/vitest` coverage. It must run on free personal accounts.
