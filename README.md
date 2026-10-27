@@ -23,3 +23,7 @@ The page and the API deploy together on Vercel. The long-running `pnpm dev` proc
 ## Tests
 
 `pnpm test` covers an employee being refused equipment creation, an overlapping loan naming the other person, a touching range being allowed, a missing equipment id, one overdue reminder that names the equipment, and a borrower seeing only their own note.
+
+## Decisions
+
+The architecture and platform choices, including the alternatives considered, are in [ADR 0004](docs/adr/0004-borrow-desk-architecture.md). Deployment details are in [the Neon + Vercel guide](docs/deploy-neon-vercel.md).
