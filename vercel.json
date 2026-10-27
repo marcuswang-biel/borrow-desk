@@ -4,6 +4,7 @@
 	"installCommand": "pnpm install",
 	"buildCommand": "pnpm build",
 	"outputDirectory": "packages/frontend/dist",
+	"crons": [{ "path": "/api/internal/overdue", "schedule": "0 0 * * *" }],
 	"rewrites": [
 		{
 			"source": "/api/(.*)",

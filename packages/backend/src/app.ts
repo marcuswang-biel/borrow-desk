@@ -20,6 +20,9 @@ export const ApiLive = Layer.mergeAll(HttpLive, BetterAuthLive).pipe(
 	Layer.provide(SqlLive),
 );
 
+/** Domain services for the overdue cron endpoint. HTTP and auth are not started. */
+export const CronLive = DomainLive.pipe(Layer.provide(SqlLive));
+
 /** Long-running server: the API plus the one-minute overdue scan. */
 export const ServerLive = Layer.mergeAll(HttpLive, BetterAuthLive, ReminderScheduleLive).pipe(
 	Layer.provide(DomainLive),

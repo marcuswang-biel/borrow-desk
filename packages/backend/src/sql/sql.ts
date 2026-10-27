@@ -57,6 +57,14 @@ export const SqlLive = Layer.unwrap(
 			prepare: env.prepare,
 			maxConnections: env.maxConnections,
 			idleTimeout: env.appEnv === 'development' ? '30 seconds' : '10 seconds',
+			// Neon suspends an idle compute. The pooler accepts the socket while
+			// the compute wakes, so the default five-second startup timeout can
+			// expire before PostgreSQL answers. Give a cold start room.
+			connectTimeout: '30 seconds',
+			// Bound a checkout that waits for the single production pool slot.
+			acquireTimeout: '35 seconds',
+			// Recycle a session even if a frozen function never saw it close.
+			connectionTTL: '5 minutes',
 		});
 	}),
 );
