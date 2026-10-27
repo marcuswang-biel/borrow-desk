@@ -1,14 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": [
+    "APP_ENV",
+    "AUTH_PUBLIC_URL",
+    "DATABASE_URL",
+    "BETTER_AUTH_SECRET",
+    "ADMIN_EMAIL",
+    "PG_PREPARE",
+    "PG_MAX_CONNECTIONS",
+    "PG_IDLE_TIMEOUT"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        "dist/**",
-        "build/**",
-        ".next/**"
-      ]
+      "outputs": ["dist/**", "build/**", ".next/**"]
     },
     "dev": {
       "cache": false,
