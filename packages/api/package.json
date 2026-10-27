@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./build/index.js"
   },
   "scripts": {
-    "build": "tsc -b"
-  },
+		"build": "tsc -p tsconfig.build.json"
+	},
   "dependencies": {
     "effect": "catalog:"
   }
