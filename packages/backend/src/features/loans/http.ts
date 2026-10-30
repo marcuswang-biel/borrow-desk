@@ -5,8 +5,10 @@ import * as HttpApiBuilder from 'effect/http-api/HttpApiBuilder';
 import { LoansService } from './loans.ts';
 
 /** HTTP adapters for borrowing and returning. */
-export const LoansHttpLive = HttpApiBuilder.group(Api, 'loans', (handlers) =>
-	Effect.gen(function* () {
+export const LoansHttpLive = HttpApiBuilder.group(
+	Api,
+	'loans',
+	Effect.fn('LoansHttpLive')(function* (handlers) {
 		const loans = yield* LoansService;
 		return handlers
 			.handle('listLoans', () => loans.list())

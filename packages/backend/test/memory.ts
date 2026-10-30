@@ -1,6 +1,6 @@
-import type { Equipment, ReminderNotice } from '@borrow-desk/api';
-
-import { type Loan, rangesOverlap } from '@borrow-desk/api';
+import { Loan, type Equipment, type ReminderNotice } from '@borrow-desk/api';
+import { rangesOverlap } from '@borrow-desk/api';
+import * as DateTime from 'effect/DateTime';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
 import * as Ref from 'effect/Ref';
@@ -12,52 +12,63 @@ export const EquipmentRepoMemory = Layer.effect(
 	EquipmentRepo,
 	Effect.gen(function* () {
 		const rows = yield* Ref.make<ReadonlyArray<Equipment>>([]);
-		return {
-			insert: (item) => Ref.update(rows, (current) => [...current, item]),
+		return EquipmentRepo.of({
+			insertIfNew: (item) =>
+				Ref.modify(rows, (current) => {
+					const existing = current.find(
+						(entry) => entry.name === item.name && entry.code === item.code,
+					);
+					if (existing !== undefined) {
+						return [existing, current] as const;
+					}
+					return [undefined, [...current, item]] as const;
+				}),
 			list: () => Ref.get(rows),
 			findById: (id) =>
 				Ref.get(rows).pipe(Effect.map((current) => current.find((item) => item.id === id))),
-			findByNameAndCode: (name, code) =>
-				Ref.get(rows).pipe(
-					Effect.map((current) => current.find((item) => item.name === name && item.code === code)),
-				),
-		};
+		});
 	}),
 );
 
 /** A loan is still out when it has not been returned. */
 const isOpen = (loan: Loan) => loan.returnedAt === null;
 
-/** In-memory ledger used by tests. */
+/** In-memory ledger used by tests. The check and insert share one update. */
 export const LoanRepoMemory = Layer.effect(
 	LoanRepo,
 	Effect.gen(function* () {
 		const rows = yield* Ref.make<ReadonlyArray<Loan>>([]);
-		return {
-			insert: (loan) => Ref.update(rows, (current) => [...current, loan]),
+		return LoanRepo.of({
 			list: () => Ref.get(rows),
 			findById: (id) =>
 				Ref.get(rows).pipe(Effect.map((current) => current.find((loan) => loan.id === id))),
-			findOverlap: (equipmentId, startsAt, endsAt) =>
+			insertIfFree: (loan) =>
+				Ref.modify(rows, (current) => {
+					const clash = current.find(
+						(entry) =>
+							entry.equipmentId === loan.equipmentId &&
+							isOpen(entry) &&
+							rangesOverlap(entry.startsAt, entry.endsAt, loan.startsAt, loan.endsAt),
+					);
+					if (clash !== undefined) {
+						return [clash, current] as const;
+					}
+					return [undefined, [...current, loan]] as const;
+				}),
+			markReturned: (id: string, returnedAt: DateTime.Utc) =>
+				Ref.update(rows, (current) =>
+					current.map((loan) => (loan.id === id ? new Loan({ ...loan, returnedAt }) : loan)),
+				),
+			listOverdue: (now: DateTime.Utc) =>
 				Ref.get(rows).pipe(
 					Effect.map((current) =>
-						current.find(
+						current.filter(
 							(loan) =>
-								loan.equipmentId === equipmentId &&
-								isOpen(loan) &&
-								rangesOverlap(loan.startsAt, loan.endsAt, startsAt, endsAt),
+								isOpen(loan) && DateTime.toEpochMillis(loan.endsAt) < DateTime.toEpochMillis(now),
 						),
 					),
 				),
-			markReturned: (id, returnedAt) =>
-				Ref.update(rows, (current) =>
-					current.map((loan) => (loan.id === id ? { ...loan, returnedAt } : loan)),
-				),
-			listOverdue: (now) =>
-				Ref.get(rows).pipe(
-					Effect.map((current) => current.filter((loan) => isOpen(loan) && loan.endsAt < now)),
-				),
-		};
+		});
 	}),
 );
 
@@ -66,12 +77,12 @@ export const ReminderMemory = Layer.effect(
 	Reminder,
 	Effect.gen(function* () {
 		const sent = yield* Ref.make<ReadonlyArray<ReminderNotice>>([]);
-		return {
+		return Reminder.of({
 			send: (notice) =>
 				Ref.update(sent, (current) =>
 					current.some((item) => item.loanId === notice.loanId) ? current : [...current, notice],
 				),
 			list: () => Ref.get(sent),
-		};
+		});
 	}),
 );

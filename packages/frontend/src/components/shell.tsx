@@ -336,7 +336,7 @@ const DeskFrame = () => {
 										{index > 0 ? <ItemSeparator /> : null}
 										<Item size="sm" variant="muted">
 											<ItemContent>
-												<ItemTitle>{shownReminder(notice.message)}</ItemTitle>
+												<ItemTitle>{shownReminder(notice)}</ItemTitle>
 												<ItemDescription>
 													{formatWhen(notice.sentAt, i18n.language)}
 												</ItemDescription>

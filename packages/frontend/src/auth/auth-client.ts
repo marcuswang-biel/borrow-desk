@@ -1,8 +1,20 @@
 import { Unauthorized } from '@borrow-desk/api';
 import { createAuthClient } from 'better-auth/client';
 import * as Effect from 'effect/Effect';
+import * as Option from 'effect/Option';
+import * as Schema from 'effect/Schema';
 
 import { i18n } from '../lib/i18n/index.ts';
+
+/** Better Auth error body that carries a sentence. */
+const AuthErrorBody = Schema.Struct({
+	message: Schema.NonEmptyString,
+});
+
+/** A resolved Better Auth call that still reported an error. */
+const RejectedCall = Schema.Struct({
+	error: Schema.Unknown,
+});
 
 /** Better Auth base URL. The dev server and production site both serve /api/auth. */
 const authUrl = `${window.location.origin}/api/auth`;
@@ -17,30 +29,18 @@ const authClient = createAuthClient({
 
 /** Turns a thrown Auth failure into Unauthorized. */
 const unauthorized = (cause: unknown) => {
-	if (
-		typeof cause === 'object' &&
-		cause !== null &&
-		'message' in cause &&
-		typeof cause.message === 'string' &&
-		cause.message.length > 0
-	) {
-		return new Unauthorized({ message: cause.message });
-	}
-	return new Unauthorized({ message: i18n.t('requestFailed') });
+	const decoded = Schema.decodeUnknownOption(AuthErrorBody)(cause);
+	const message = Option.isSome(decoded) ? decoded.value.message : i18n.t('requestFailed');
+	return new Unauthorized({ message });
 };
 
 /** Fails when Better Auth reports an error on an otherwise resolved call. */
 const rejectResult = (result: unknown) => {
-	if (
-		typeof result === 'object' &&
-		result !== null &&
-		'error' in result &&
-		result.error !== null &&
-		result.error !== undefined
-	) {
-		return Effect.fail(unauthorized(result.error));
+	const decoded = Schema.decodeUnknownOption(RejectedCall)(result);
+	if (Option.isNone(decoded) || decoded.value.error === null || decoded.value.error === undefined) {
+		return Effect.void;
 	}
-	return Effect.void;
+	return Effect.fail(unauthorized(decoded.value.error));
 };
 
 /** Reads a JWT from the Better Auth session cookie. No cookie is a signed-out success. */

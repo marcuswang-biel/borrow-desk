@@ -3,7 +3,15 @@ import * as Config from 'effect/Config';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
 import * as Redacted from 'effect/Redacted';
+import * as Schema from 'effect/Schema';
 import * as jose from 'jose';
+
+/** Identity claims Better Auth puts in the access token. */
+const Claims = Schema.Struct({
+	sub: Schema.String,
+	email: Schema.String,
+	name: Schema.String,
+});
 
 /** Public origin Better Auth prints into the token, and the browser uses for cookies. */
 const publicOrigin = Config.String('AUTH_PUBLIC_URL');
@@ -53,18 +61,11 @@ export const AuthenticationLive = Layer.effect(
 						try: () => jose.jwtVerify(token, jwks, { issuer: origin }),
 						catch: () => new Unauthorized({ message: 'Invalid bearer token' }),
 					});
-					const claims = verified.payload as {
-						readonly sub?: string;
-						readonly email?: string;
-						readonly name?: string;
-					};
-					if (
-						typeof claims.sub !== 'string' ||
-						typeof claims.email !== 'string' ||
-						typeof claims.name !== 'string'
-					) {
-						return yield* new Unauthorized({ message: 'Bearer token is missing identity claims' });
-					}
+					const claims = yield* Schema.decodeUnknownEffect(Claims)(verified.payload).pipe(
+						Effect.mapError(
+							() => new Unauthorized({ message: 'Bearer token is missing identity claims' }),
+						),
+					);
 					return yield* Effect.provideService(httpEffect, CurrentUser, {
 						id: claims.sub,
 						email: claims.email,

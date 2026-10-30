@@ -1,25 +1,20 @@
-import type { Equipment } from '@borrow-desk/api';
-
+import { Equipment } from '@borrow-desk/api';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
+import * as Schema from 'effect/Schema';
 import { SqlClient } from 'effect/sql/SqlClient';
+import * as SqlSchema from 'effect/sql/SqlSchema';
 
+import { asDefect } from '../../sql/defect.ts';
+import { DbInstant, millis } from '../../sql/instant.ts';
 import { EquipmentRepo } from './equipment.ts';
 
-/** One equipment row as PostgreSQL returns it. */
-interface EquipmentRow {
-	readonly id: string;
-	readonly name: string;
-	readonly code: string;
-	readonly created_at: string | number;
-}
-
-/** Maps a database row onto the shared equipment schema. */
-const toEquipment = (row: EquipmentRow): Equipment => ({
-	id: row.id,
-	name: row.name,
-	code: row.code,
-	createdAt: Number(row.created_at),
+/** One equipment row with columns aliased to the domain names. */
+const EquipmentRow = Schema.Struct({
+	id: Schema.String,
+	name: Schema.String,
+	code: Schema.String,
+	createdAt: DbInstant,
 });
 
 /** Catalog backed by the equipment table. */
@@ -27,33 +22,59 @@ export const EquipmentRepoSql = Layer.effect(
 	EquipmentRepo,
 	Effect.gen(function* () {
 		const sql = yield* SqlClient;
-		return {
-			insert: (item) =>
-				sql`insert into equipment (id, name, code, created_at) values (${item.id}, ${item.name}, ${item.code}, ${item.createdAt})`.pipe(
-					Effect.asVoid,
-					Effect.orDie,
-				),
-			list: () =>
-				sql<EquipmentRow>`select id, name, code, created_at from equipment order by name, code`.pipe(
-					Effect.map((rows) => rows.map((row) => toEquipment(row))),
-					Effect.orDie,
-				),
-			findById: (id) =>
-				sql<EquipmentRow>`select id, name, code, created_at from equipment where id = ${id}`.pipe(
-					Effect.map((rows) => {
-						const row = rows[0];
-						return row === undefined ? undefined : toEquipment(row);
-					}),
-					Effect.orDie,
-				),
-			findByNameAndCode: (name, code) =>
-				sql<EquipmentRow>`select id, name, code, created_at from equipment where name = ${name} and code = ${code}`.pipe(
-					Effect.map((rows) => {
-						const row = rows[0];
-						return row === undefined ? undefined : toEquipment(row);
-					}),
-					Effect.orDie,
-				),
-		};
+		const decode = Schema.decodeUnknownEffect(Equipment);
+		const read = SqlSchema.findAll({
+			Request: Schema.Void,
+			Result: EquipmentRow,
+			execute: () =>
+				sql`select id, name, code, created_at::float8 as "createdAt" from equipment order by name, code`,
+		});
+		const findByIdQuery = SqlSchema.findAll({
+			Request: Schema.String,
+			Result: EquipmentRow,
+			execute: (id) =>
+				sql`select id, name, code, created_at::float8 as "createdAt" from equipment where id = ${id}`,
+		});
+		const findByNameQuery = SqlSchema.findAll({
+			Request: Schema.Struct({ name: Schema.String, code: Schema.String }),
+			Result: EquipmentRow,
+			execute: (request) =>
+				sql`select id, name, code, created_at::float8 as "createdAt" from equipment where name = ${request.name} and code = ${request.code}`,
+		});
+		const toEquipment = (row: typeof EquipmentRow.Type) => decode(row);
+
+		const findById = Effect.fn('EquipmentRepo.findById')(function* (id: string) {
+			const rows = yield* findByIdQuery(id);
+			const row = rows[0];
+			return row === undefined ? undefined : yield* toEquipment(row);
+		}, asDefect);
+
+		const findByNameAndCode = Effect.fn('EquipmentRepo.findByNameAndCode')(function* (
+			name: string,
+			code: string,
+		) {
+			const rows = yield* findByNameQuery({ name, code });
+			const row = rows[0];
+			return row === undefined ? undefined : yield* toEquipment(row);
+		}, asDefect);
+
+		const insertIfNew = Effect.fn('EquipmentRepo.insertIfNew')(function* (item: Equipment) {
+			return yield* sql.withTransaction(
+				Effect.gen(function* () {
+					const existing = yield* findByNameAndCode(item.name, item.code);
+					if (existing !== undefined) {
+						return existing;
+					}
+					yield* sql`insert into equipment (id, name, code, created_at) values (${item.id}, ${item.name}, ${item.code}, ${millis(item.createdAt)})`;
+					return undefined;
+				}),
+			);
+		}, asDefect);
+
+		const list = Effect.fn('EquipmentRepo.list')(function* () {
+			return yield* Effect.forEach(yield* read(), toEquipment);
+		}, asDefect);
+
+		return EquipmentRepo.of({ insertIfNew, list, findById });
 	}),
 );

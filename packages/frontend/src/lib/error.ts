@@ -1,4 +1,4 @@
-import type { EquipmentError, LoanError, UserError } from '@borrow-desk/api';
+import type { EquipmentError, LoanError, ReminderNotice, UserError } from '@borrow-desk/api';
 import type * as HttpClientError from 'effect/http/HttpClientError';
 import type * as Schema from 'effect/Schema';
 
@@ -16,28 +16,15 @@ export type DeskError =
 	| HttpClientError.HttpClientError
 	| Schema.SchemaError;
 
-/** Turns a stored English reminder into the active language. */
-export const shownReminder = (message: string) => {
-	const missing = ' has not returned equipment that is no longer in the catalog';
-	if (message.endsWith(missing)) {
-		return i18n.t('reminderMissing', { name: message.slice(0, -missing.length) });
-	}
-	const marker = ' has not returned ';
-	const index = message.indexOf(marker);
-	if (index < 0) {
-		return message;
-	}
-	const rest = message.slice(index + marker.length);
-	const split = rest.lastIndexOf(' ');
-	if (split <= 0) {
-		return message;
-	}
-	return i18n.t('reminderBody', {
-		name: message.slice(0, index),
-		equipment: rest.slice(0, split),
-		code: rest.slice(split + 1),
-	});
-};
+/** Turns one reminder into the active language. */
+export const shownReminder = (notice: ReminderNotice) =>
+	notice.equipmentName === null || notice.equipmentCode === null
+		? i18n.t('reminderMissing', { name: notice.borrowerName })
+		: i18n.t('reminderBody', {
+				name: notice.borrowerName,
+				equipment: notice.equipmentName,
+				code: notice.equipmentCode,
+			});
 
 /** Sentence for one shared failure, in the active language. */
 const forbiddenCopy = (message: string) => {
@@ -46,10 +33,6 @@ const forbiddenCopy = (message: string) => {
 			return i18n.t('returnOwnLoan');
 		case 'Only an admin can record equipment':
 			return i18n.t('adminOnly');
-		case 'Equipment name is empty':
-			return i18n.t('equipmentNameEmpty');
-		case 'Equipment number is empty':
-			return i18n.t('equipmentNumberEmpty');
 		default:
 			return message;
 	}

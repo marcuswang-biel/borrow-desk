@@ -1,20 +1,20 @@
 import * as Schema from 'effect/Schema';
 
+import { Instant } from '../instant.ts';
+
+/** A name or number with surrounding spaces removed. Empty text is rejected. */
+export const RequiredText = Schema.Trim.pipe(Schema.decodeTo(Schema.NonEmptyString));
+
 /** One piece of equipment an admin has recorded. `code` is its number within `name`. */
-export const Equipment = Schema.Struct({
+export class Equipment extends Schema.Class<Equipment>('Equipment')({
 	id: Schema.String,
-	name: Schema.String,
-	code: Schema.String,
-	createdAt: Schema.Number,
-});
+	name: RequiredText,
+	code: RequiredText,
+	createdAt: Instant,
+}) {}
 
 /** Body used to record a new piece of equipment. */
-export const CreateEquipment = Schema.Struct({
-	name: Schema.String,
-	code: Schema.String,
-});
-
-/** Equipment value returned by the API. */
-export type Equipment = typeof Equipment.Type;
-/** Create-equipment payload. */
-export type CreateEquipment = typeof CreateEquipment.Type;
+export class CreateEquipment extends Schema.Class<CreateEquipment>('CreateEquipment')({
+	name: RequiredText,
+	code: RequiredText,
+}) {}

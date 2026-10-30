@@ -5,8 +5,10 @@ import * as HttpApiBuilder from 'effect/http-api/HttpApiBuilder';
 import { EquipmentService } from './equipment.ts';
 
 /** HTTP adapters for the equipment catalog. */
-export const EquipmentHttpLive = HttpApiBuilder.group(Api, 'equipment', (handlers) =>
-	Effect.gen(function* () {
+export const EquipmentHttpLive = HttpApiBuilder.group(
+	Api,
+	'equipment',
+	Effect.fn('EquipmentHttpLive')(function* (handlers) {
 		const equipment = yield* EquipmentService;
 		return handlers
 			.handle('listEquipment', () => equipment.list())

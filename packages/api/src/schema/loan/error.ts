@@ -1,5 +1,7 @@
 import * as Schema from 'effect/Schema';
 
+import { Instant } from '../instant.ts';
+
 /** The requested loan id is not in the ledger. */
 export class LoanNotFound extends Schema.TaggedError<LoanNotFound>()(
 	'LoanNotFound',
@@ -20,8 +22,8 @@ export class LoanConflict extends Schema.TaggedError<LoanConflict>()(
 	{
 		message: Schema.String,
 		borrowerName: Schema.String,
-		startsAt: Schema.Number,
-		endsAt: Schema.Number,
+		startsAt: Instant,
+		endsAt: Instant,
 	},
 	{ httpApiStatus: 409 },
 ) {}

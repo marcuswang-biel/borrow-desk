@@ -1,4 +1,5 @@
 import { Api } from '@borrow-desk/api';
+import * as DateTime from 'effect/DateTime';
 import * as Effect from 'effect/Effect';
 import * as HttpApiClient from 'effect/http-api/HttpApiClient';
 
@@ -23,7 +24,7 @@ export const createEquipment = (name: string, code: string) =>
 	Effect.flatMap(desk, (api) => api.equipment.createEquipment({ payload: { name, code } }));
 
 /** Borrows one piece of equipment for a millisecond range. */
-export const borrow = (equipmentId: string, startsAt: number, endsAt: number) =>
+export const borrow = (equipmentId: string, startsAt: DateTime.Utc, endsAt: DateTime.Utc) =>
 	Effect.flatMap(desk, (api) => api.loans.borrow({ payload: { equipmentId, startsAt, endsAt } }));
 
 /** Loads reminders sent to the signed-in borrower. */

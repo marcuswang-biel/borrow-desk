@@ -7,6 +7,7 @@ export {
 	EquipmentCodeTaken,
 	EquipmentNotFound,
 	Forbidden,
+	Instant,
 	InvalidLoanPeriod,
 	Loan,
 	LoanConflict,

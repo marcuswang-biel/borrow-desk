@@ -28,6 +28,14 @@ Development reads `.env.development` and must use local PostgreSQL. Production r
 
 Comments in code are English. Every exported function and module-level binding has one.
 
+## Learning more about Effect
+
+This repository uses the Effect Typescript library.
+
+Before writing any Effect code, first read `node_modules/effect/AGENTS.md` completely, and follow the links in the file when required.
+
+If you need to learn more about particular Effect apis and concepts that the guide doesn't cover, search through the source code in `node_modules/effect/src`.
+
 ## Further reading
 
 Setup is in `README.md`. Words are in `CONTEXT.md`. Auth is in `docs/auth.md`. The runtime choice is in `docs/adr/0001-effect-postgres-vercel.md`.

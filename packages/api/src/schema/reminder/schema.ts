@@ -1,12 +1,13 @@
 import * as Schema from 'effect/Schema';
 
+import { Instant } from '../instant.ts';
+
 /** A reminder already delivered for one overdue loan. */
-export const ReminderNotice = Schema.Struct({
+export class ReminderNotice extends Schema.Class<ReminderNotice>('ReminderNotice')({
 	loanId: Schema.String,
 	userId: Schema.String,
-	message: Schema.String,
-	sentAt: Schema.Number,
-});
-
-/** Reminder value stored by the reminder service. */
-export type ReminderNotice = typeof ReminderNotice.Type;
+	borrowerName: Schema.String,
+	equipmentName: Schema.NullOr(Schema.String),
+	equipmentCode: Schema.NullOr(Schema.String),
+	sentAt: Instant,
+}) {}

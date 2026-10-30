@@ -5,8 +5,10 @@ import * as HttpApiBuilder from 'effect/http-api/HttpApiBuilder';
 import { RemindersService } from './reminders.ts';
 
 /** HTTP adapter for the signed-in borrower's reminders. */
-export const RemindersHttpLive = HttpApiBuilder.group(Api, 'reminders', (handlers) =>
-	Effect.gen(function* () {
+export const RemindersHttpLive = HttpApiBuilder.group(
+	Api,
+	'reminders',
+	Effect.fn('RemindersHttpLive')(function* (handlers) {
 		const reminders = yield* RemindersService;
 		return handlers.handle('listReminders', () => reminders.list());
 	}),

@@ -1,6 +1,7 @@
 import type { Loan } from '@borrow-desk/api';
 
 import { createFileRoute } from '@tanstack/react-router';
+import * as DateTime from 'effect/DateTime';
 import * as Effect from 'effect/Effect';
 import { useMemo, useState, type MouseEvent, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,19 +58,22 @@ import { equipmentLabel, fieldValue, formatWhen, toMillis } from '../lib/text.ts
 /** Loans shown on one page of the record. */
 const pageSize = 5;
 
+/** Milliseconds since the epoch for one instant. */
+const millis = DateTime.toEpochMillis;
+
 /** Show Overdue loans first. Inside each group, the later start comes first. */
 const compareLoans = (now: number, left: Loan, right: Loan): number => {
-	const leftOverdue = left.returnedAt === null && left.endsAt < now;
-	const rightOverdue = right.returnedAt === null && right.endsAt < now;
+	const leftOverdue = left.returnedAt === null && millis(left.endsAt) < now;
+	const rightOverdue = right.returnedAt === null && millis(right.endsAt) < now;
 	/** If Left overdue loan not equal right overdue loan */
 	if (leftOverdue !== rightOverdue) {
 		return leftOverdue ? -1 : 1;
 	}
-	if (left.startsAt !== right.startsAt) {
-		return right.startsAt - left.startsAt;
+	if (millis(left.startsAt) !== millis(right.startsAt)) {
+		return millis(right.startsAt) - millis(left.startsAt);
 	}
-	if (left.endsAt !== right.endsAt) {
-		return right.endsAt - left.endsAt;
+	if (millis(left.endsAt) !== millis(right.endsAt)) {
+		return millis(right.endsAt) - millis(left.endsAt);
 	}
 	if (left.id === right.id) {
 		return 0;
@@ -113,7 +117,7 @@ const LoansPage = () => {
 	const [pickedId, setPickedId] = useState<string | null>(null);
 	const [page, setPage] = useState(0);
 	const [query, setQuery] = useState('');
-	const [now] = useState(() => Date.now());
+	const [now] = useState(() => millis(DateTime.nowUnsafe()));
 	const orderedLoans = useMemo(() => {
 		const next = [...loans];
 		next.sort((left, right) => compareLoans(now, left, right));
@@ -123,7 +127,7 @@ const LoansPage = () => {
 		() =>
 			orderedLoans.filter((loan) => {
 				const item = equipment.find((entry) => entry.id === loan.equipmentId);
-				const overdue = loan.returnedAt === null && loan.endsAt < now;
+				const overdue = loan.returnedAt === null && millis(loan.endsAt) < now;
 				const status =
 					loan.returnedAt !== null
 						? t('returned', { when: formatWhen(loan.returnedAt, i18n.language) })
@@ -153,7 +157,7 @@ const LoansPage = () => {
 		return null;
 	}
 
-	const when = (millis: number) => formatWhen(millis, i18n.language);
+	const when = (instant: DateTime.DateTime) => formatWhen(instant, i18n.language);
 	const stillOut = loans.filter((loan) => loan.returnedAt === null).length;
 	const canBook = equipment.length > 0;
 	const equipmentItems = equipment.map((item) => ({
@@ -181,8 +185,8 @@ const LoansPage = () => {
 		void run(
 			borrow(
 				equipmentId,
-				toMillis(fieldValue(form, 'startsAt')),
-				toMillis(fieldValue(form, 'endsAt')),
+				DateTime.makeUnsafe(toMillis(fieldValue(form, 'startsAt'))),
+				DateTime.makeUnsafe(toMillis(fieldValue(form, 'endsAt'))),
 			).pipe(
 				Effect.andThen(refresh),
 				Effect.tap(() =>
@@ -340,7 +344,7 @@ const LoansPage = () => {
 							<TableBody>
 								{visibleLoans.map((loan) => {
 									const item = equipment.find((entry) => entry.id === loan.equipmentId);
-									const overdue = loan.returnedAt === null && loan.endsAt < now;
+									const overdue = loan.returnedAt === null && millis(loan.endsAt) < now;
 									const returning = returningId === loan.id;
 									const canReturn =
 										loan.returnedAt === null &&

@@ -1,8 +1,10 @@
 import * as NodeServices from '@effect/platform-node/NodeServices';
+import * as Cause from 'effect/Cause';
 import * as Effect from 'effect/Effect';
 import * as HttpRouter from 'effect/http/HttpRouter';
 import * as HttpServer from 'effect/http/HttpServer';
 import * as Layer from 'effect/Layer';
+import * as ManagedRuntime from 'effect/ManagedRuntime';
 import { timingSafeEqual } from 'node:crypto';
 
 import { ApiLive, CronLive } from './app.ts';
@@ -34,9 +36,14 @@ const authorized = (request: Request) => {
 	);
 };
 
-/** Runs the same overdue scan as the long-running server. */
+/** One runtime for the overdue scan. The pool stays open across scheduler calls. */
+const cronRuntime = ManagedRuntime.make(CronLive.pipe(Layer.provide(NodeServices.layer)));
+
+/** Runs the same overdue scan as the long-running server. A failure is logged and reported as success of the effect so the runtime stays up. */
 const runOverdue = () =>
-	Effect.runPromise(scanOverdue.pipe(Effect.provide(CronLive), Effect.provide(NodeServices.layer)));
+	cronRuntime.runPromise(
+		scanOverdue().pipe(Effect.catchCause((cause) => Effect.logError(Cause.pretty(cause)))),
+	);
 
 /** Handles the scheduler request and runs the scan once. */
 const handleCron = async (request: Request) => {
@@ -49,13 +56,8 @@ const handleCron = async (request: Request) => {
 	if (!authorized(request)) {
 		return new Response('Unauthorized', { status: 401 });
 	}
-	try {
-		await runOverdue();
-		return Response.json({ ok: true });
-	} catch (error) {
-		console.error('Overdue scan failed', error);
-		return new Response('Overdue scan failed', { status: 500 });
-	}
+	await runOverdue();
+	return Response.json({ ok: true });
 };
 
 /** Fetch function Vercel invokes for /api requests. */

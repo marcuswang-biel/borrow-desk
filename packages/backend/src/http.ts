@@ -11,7 +11,7 @@ import {
 } from './features/index.ts';
 
 /** Route handlers. Domain services are provided once, beside this layer. */
-export const HttpLive = HttpApiBuilder.layer(Api).pipe(
+export const HttpLive = HttpApiBuilder.layer(Api, { openapiPath: '/openapi.json' }).pipe(
 	Layer.provide(SessionLive),
 	Layer.provide(EquipmentHttpLive),
 	Layer.provide(LoansHttpLive),

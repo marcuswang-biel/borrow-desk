@@ -19,6 +19,6 @@ export const authedClient = Layer.effect(
 	}),
 ).pipe(Layer.provide(FetchHttpClient.layer));
 
-/** Provides the fetch client and runs the effect. Failures stay in the error channel until caught. */
-export const run = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
-	Effect.runPromise(effect.pipe(Effect.provide(authedClient)) as Effect.Effect<A, E>);
+/** Provides the fetch client and runs the effect. The effect may only require that client. */
+export const run = <A, E>(effect: Effect.Effect<A, E, HttpClient.HttpClient>) =>
+	Effect.runPromise(effect.pipe(Effect.provide(authedClient)));
