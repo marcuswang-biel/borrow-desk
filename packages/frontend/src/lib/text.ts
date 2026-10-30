@@ -2,7 +2,7 @@ import type { Equipment } from '@borrow-desk/api';
 
 import * as DateTime from 'effect/DateTime';
 
-import { localeTag } from './i18n/index.ts';
+import { localeTag, getLocale } from './i18n/index.ts';
 
 /** Reads one named field from a form. */
 export const fieldValue = (form: HTMLFormElement, name: string) => {
@@ -18,8 +18,8 @@ export const toMillis = (value: string) => new Date(value).getTime();
 export const equipmentLabel = (item: Equipment) => `${item.name} ${item.code}`;
 
 /** Formats one instant in the active language. */
-export const formatWhen = (when: DateTime.DateTime, language: string) =>
-	new Intl.DateTimeFormat(localeTag(language), {
+export const formatWhen = (when: DateTime.DateTime) =>
+	new Intl.DateTimeFormat(localeTag(getLocale()), {
 		dateStyle: 'short',
 		timeStyle: 'short',
 	}).format(DateTime.toEpochMillis(when));

@@ -4,7 +4,6 @@ import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-route
 import * as Effect from 'effect/Effect';
 import { BellIcon, BoxesIcon, CalendarClockIcon, GlobeIcon, PackageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -48,21 +47,23 @@ import { Spinner } from '@/components/ui/spinner';
 
 import { useSession } from '../auth/index.ts';
 import {
-	activeLocale,
 	changeLocale,
 	formatWhen,
+	getLocale,
 	listReminders,
 	localeTag,
+	roleLabel,
 	run,
 	shown,
 	shownReminder,
 	type DeskError,
 } from '../lib/index.ts';
+import { m } from '../paraglide/messages.js';
 
 /** Sidebar links for the catalog and the loan board. */
 const routes = [
-	{ to: '/equipment', tTag: 'equipment' },
-	{ to: '/loans', tTag: 'loans' },
+	{ to: '/equipment', label: m.equipment },
+	{ to: '/loans', label: m.loans },
 ] as const;
 
 /** Digits on the reminder bell when the count is at least 1. Counts of 100 or more show as 99+. */
@@ -77,21 +78,20 @@ const languageItems = [
 
 /** Language menu. The list opens under the trigger and uses the trigger width. */
 const LanguageSelect = ({ className, wide = false }: { className?: string; wide?: boolean }) => {
-	const { t, i18n } = useTranslation();
-	const language = activeLocale(i18n.language);
+	const language = getLocale();
 
 	return (
 		<Select
 			items={languageItems}
 			onValueChange={(next) => {
 				if (next === 'en' || next === 'zh' || next === 'zh-Hant') {
-					void changeLocale(next);
+					changeLocale(next);
 				}
 			}}
 			value={language}
 		>
 			<div className={className}>
-				<SelectTrigger aria-label={t('language')} className={wide ? 'w-full' : 'w-fit'} size="sm">
+				<SelectTrigger aria-label={m.language()} className={wide ? 'w-full' : 'w-fit'} size="sm">
 					<GlobeIcon />
 					<SelectValue />
 				</SelectTrigger>
@@ -115,7 +115,6 @@ const LanguageSelect = ({ className, wide = false }: { className?: string; wide?
 
 /** Sidebar, reminders, and the matched page. */
 const DeskFrame = () => {
-	const { t, i18n } = useTranslation();
 	const { status, user, reminders, replaceReminders, signOut } = useSession();
 	const navigate = useNavigate();
 	const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -127,9 +126,9 @@ const DeskFrame = () => {
 	const [signingOut, setSigningOut] = useState(false);
 
 	useEffect(() => {
-		document.title = t('title');
-		document.documentElement.lang = localeTag(i18n.language);
-	}, [i18n.language, t]);
+		document.title = m.title();
+		document.documentElement.lang = localeTag(getLocale());
+	}, []);
 
 	const openReminders = () => {
 		if (opening) {
@@ -207,7 +206,7 @@ const DeskFrame = () => {
 								}}
 							>
 								<BoxesIcon />
-								<span>{t('title')}</span>
+								<span>{m.title()}</span>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>
@@ -215,7 +214,7 @@ const DeskFrame = () => {
 				<SidebarContent>
 					{status === 'signed-in' ? (
 						<SidebarGroup>
-							<SidebarGroupLabel>{t('navLabel')}</SidebarGroupLabel>
+							<SidebarGroupLabel>{m.navLabel()}</SidebarGroupLabel>
 							<SidebarGroupContent>
 								<SidebarMenu>
 									{routes.map((route) => (
@@ -227,8 +226,8 @@ const DeskFrame = () => {
 												}}
 												render={<Link to={route.to} />}
 											>
-												{route.tTag === 'equipment' ? <PackageIcon /> : <CalendarClockIcon />}
-												<span>{t(route.tTag)}</span>
+												{route.to === '/equipment' ? <PackageIcon /> : <CalendarClockIcon />}
+												<span>{route.label()}</span>
 											</SidebarMenuButton>
 										</SidebarMenuItem>
 									))}
@@ -249,7 +248,7 @@ const DeskFrame = () => {
 								variant="destructive"
 							>
 								{signingOut ? <Spinner data-icon="inline-start" /> : null}
-								{t('signOut')}
+								{m.signOut()}
 							</Button>
 							{signOutError.length > 0 ? (
 								<Alert variant="destructive">
@@ -263,18 +262,18 @@ const DeskFrame = () => {
 			</Sidebar>
 			<SidebarInset className="min-w-0">
 				<header className="flex min-h-14 items-center gap-3 border-b px-4 md:px-6">
-					<SidebarTrigger aria-label={t('menu')} className="-ml-1" />
+					<SidebarTrigger aria-label={m.menu()} className="-ml-1" />
 					<Link
 						className="text-foreground mr-auto inline-flex shrink-0 items-center gap-2 text-sm leading-5 font-semibold no-underline md:hidden [&_svg]:size-6"
 						to={home}
 					>
 						<BoxesIcon />
-						<span>{t('title')}</span>
+						<span>{m.title()}</span>
 					</Link>
 					<div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-3">
 						{status === 'signed-in' && user !== undefined ? (
 							<p className="text-muted-foreground m-0 hidden text-sm sm:block">
-								{t('signedIn', { name: user.name, role: t(`role.${user.role}`) })}
+								{m.signedIn({ name: user.name, role: roleLabel(user.role) })}
 							</p>
 						) : null}
 						<LanguageSelect className="hidden md:block" />
@@ -282,7 +281,7 @@ const DeskFrame = () => {
 							<Button
 								aria-busy={opening}
 								aria-expanded={remindersOpen}
-								aria-label={t('remindersCount', { count: reminders.length })}
+								aria-label={m.remindersCount({ count: reminders.length })}
 								className="relative"
 								disabled={opening}
 								onClick={openReminders}
@@ -315,7 +314,7 @@ const DeskFrame = () => {
 			<Sheet onOpenChange={setRemindersOpen} open={remindersOpen}>
 				<SheetContent>
 					<SheetHeader>
-						<SheetTitle>{t('remindersTitle')}</SheetTitle>
+						<SheetTitle>{m.remindersTitle()}</SheetTitle>
 					</SheetHeader>
 					<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4">
 						{reminderError.length > 0 ? (
@@ -326,7 +325,7 @@ const DeskFrame = () => {
 						{reminders.length === 0 ? (
 							<Empty>
 								<EmptyHeader>
-									<EmptyDescription>{t('emptyReminders')}</EmptyDescription>
+									<EmptyDescription>{m.emptyReminders()}</EmptyDescription>
 								</EmptyHeader>
 							</Empty>
 						) : (
@@ -337,9 +336,7 @@ const DeskFrame = () => {
 										<Item size="sm" variant="muted">
 											<ItemContent>
 												<ItemTitle>{shownReminder(notice)}</ItemTitle>
-												<ItemDescription>
-													{formatWhen(notice.sentAt, i18n.language)}
-												</ItemDescription>
+												<ItemDescription>{formatWhen(notice.sentAt)}</ItemDescription>
 											</ItemContent>
 										</Item>
 									</div>

@@ -1,7 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import * as Effect from 'effect/Effect';
 import { useState, type SubmitEvent } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { run } from '../lib/client.ts';
 import { showFailure } from '../lib/error.ts';
 import { fieldValue } from '../lib/text.ts';
+import { m } from '../paraglide/messages.js';
 import { signIn as signInWithEmail, signUp as signUpWithEmail } from './auth-client.ts';
 import { useSession } from './session.tsx';
 
@@ -21,7 +21,6 @@ type AuthMode = 'sign-in' | 'sign-up';
 
 /** Email and password form. Tabs switch between signing in and creating an account. */
 export const SignInPanel = () => {
-	const { t } = useTranslation();
 	const { refresh } = useSession();
 	const navigate = useNavigate();
 	const [authError, setAuthError] = useState('');
@@ -71,7 +70,7 @@ export const SignInPanel = () => {
 	return (
 		<Card className="w-full max-w-md">
 			<CardHeader>
-				<CardTitle>{t('title')}</CardTitle>
+				<CardTitle>{m.title()}</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<Tabs
@@ -83,19 +82,19 @@ export const SignInPanel = () => {
 					value={mode}
 				>
 					<TabsList className="w-full">
-						<TabsTrigger value="sign-in">{t('signIn')}</TabsTrigger>
-						<TabsTrigger value="sign-up">{t('signUp')}</TabsTrigger>
+						<TabsTrigger value="sign-in">{m.signIn()}</TabsTrigger>
+						<TabsTrigger value="sign-up">{m.signUp()}</TabsTrigger>
 					</TabsList>
 					<form onSubmit={submit}>
 						<FieldGroup>
 							{mode === 'sign-up' ? (
 								<Field>
-									<FieldLabel htmlFor="name">{t('personName')}</FieldLabel>
+									<FieldLabel htmlFor="name">{m.personName()}</FieldLabel>
 									<Input autoComplete="name" id="name" name="name" required />
 								</Field>
 							) : null}
 							<Field data-invalid={invalid || undefined}>
-								<FieldLabel htmlFor="email">{t('email')}</FieldLabel>
+								<FieldLabel htmlFor="email">{m.email()}</FieldLabel>
 								<Input
 									aria-invalid={invalid}
 									autoComplete="email"
@@ -106,7 +105,7 @@ export const SignInPanel = () => {
 								/>
 							</Field>
 							<Field data-invalid={invalid || undefined}>
-								<FieldLabel htmlFor="password">{t('password')}</FieldLabel>
+								<FieldLabel htmlFor="password">{m.password()}</FieldLabel>
 								<Input
 									aria-describedby={mode === 'sign-up' ? 'password-hint' : undefined}
 									aria-invalid={invalid}
@@ -118,13 +117,13 @@ export const SignInPanel = () => {
 									type="password"
 								/>
 								{mode === 'sign-up' ? (
-									<FieldDescription id="password-hint">{t('passwordHint')}</FieldDescription>
+									<FieldDescription id="password-hint">{m.passwordHint()}</FieldDescription>
 								) : null}
 							</Field>
 							{invalid ? <FieldError>{authError}</FieldError> : null}
 							<Button aria-busy={pending} disabled={pending} type="submit">
 								{pending ? <Spinner data-icon="inline-start" /> : null}
-								{mode === 'sign-in' ? t('signIn') : t('signUp')}
+								{mode === 'sign-in' ? m.signIn() : m.signUp()}
 							</Button>
 						</FieldGroup>
 					</form>

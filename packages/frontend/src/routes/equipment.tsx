@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import * as Effect from 'effect/Effect';
 import { useState, type SubmitEvent } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +30,7 @@ import { createEquipment } from '../lib/api.ts';
 import { run } from '../lib/client.ts';
 import { showFailure } from '../lib/error.ts';
 import { fieldValue } from '../lib/text.ts';
+import { m } from '../paraglide/messages.js';
 
 /** True when the query is empty or appears in the text, ignoring case. */
 const matchesQuery = (query: string, text: string): boolean => {
@@ -40,7 +40,6 @@ const matchesQuery = (query: string, text: string): boolean => {
 
 /** Catalog. An admin can record a kind and a number. */
 const EquipmentPage = () => {
-	const { t } = useTranslation();
 	const { user, equipment, refresh } = useSession();
 	const [equipmentError, setEquipmentError] = useState('');
 	const [pending, setPending] = useState(false);
@@ -85,17 +84,17 @@ const EquipmentPage = () => {
 		user.role === 'admin' ? (
 			<Card>
 				<CardHeader>
-					<CardTitle>{t('recordEquipment')}</CardTitle>
+					<CardTitle>{m.recordEquipment()}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={addEquipment}>
 						<FieldGroup>
 							<Field data-invalid={invalid || undefined}>
-								<FieldLabel htmlFor="equipmentName">{t('equipmentName')}</FieldLabel>
+								<FieldLabel htmlFor="equipmentName">{m.equipmentName()}</FieldLabel>
 								<Input aria-invalid={invalid} id="equipmentName" name="equipmentName" required />
 							</Field>
 							<Field data-invalid={invalid || undefined}>
-								<FieldLabel htmlFor="equipmentCode">{t('number')}</FieldLabel>
+								<FieldLabel htmlFor="equipmentCode">{m.number()}</FieldLabel>
 								<Input
 									aria-invalid={invalid}
 									className="font-mono"
@@ -107,7 +106,7 @@ const EquipmentPage = () => {
 							{invalid ? <FieldError>{equipmentError}</FieldError> : null}
 							<Button aria-busy={pending} disabled={pending} type="submit">
 								{pending ? <Spinner data-icon="inline-start" /> : null}
-								{t('recordEquipment')}
+								{m.recordEquipment()}
 							</Button>
 						</FieldGroup>
 					</form>
@@ -125,17 +124,17 @@ const EquipmentPage = () => {
 		>
 			<Card className="min-w-0">
 				<CardHeader className="border-b">
-					<CardTitle>{t('equipment')}</CardTitle>
-					<CardDescription>{t('pieces', { count: equipment.length })}</CardDescription>
+					<CardTitle>{m.equipment()}</CardTitle>
+					<CardDescription>{m.pieces({ count: equipment.length })}</CardDescription>
 					{equipment.length > 0 ? (
 						<CardAction>
 							<Input
-								aria-label={t('search')}
+								aria-label={m.search()}
 								className="w-36 sm:w-56"
 								onChange={(event) => {
 									setQuery(event.target.value);
 								}}
-								placeholder={t('search')}
+								placeholder={m.search()}
 								type="search"
 								value={query}
 							/>
@@ -147,7 +146,7 @@ const EquipmentPage = () => {
 						<Empty>
 							<EmptyHeader>
 								<EmptyDescription>
-									{user.role === 'admin' ? t('emptyEquipmentAdmin') : t('emptyEquipmentEmployee')}
+									{user.role === 'admin' ? m.emptyEquipmentAdmin() : m.emptyEquipmentEmployee()}
 								</EmptyDescription>
 							</EmptyHeader>
 						</Empty>
@@ -156,7 +155,7 @@ const EquipmentPage = () => {
 					<CardContent>
 						<Empty>
 							<EmptyHeader>
-								<EmptyDescription>{t('noMatches')}</EmptyDescription>
+								<EmptyDescription>{m.noMatches()}</EmptyDescription>
 							</EmptyHeader>
 						</Empty>
 					</CardContent>
@@ -165,8 +164,8 @@ const EquipmentPage = () => {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>{t('equipmentName')}</TableHead>
-									<TableHead className="text-right">{t('number')}</TableHead>
+									<TableHead>{m.equipmentName()}</TableHead>
+									<TableHead className="text-right">{m.number()}</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>

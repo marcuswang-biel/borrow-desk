@@ -5,7 +5,7 @@ import type * as Schema from 'effect/Schema';
 import * as Effect from 'effect/Effect';
 import * as Match from 'effect/Match';
 
-import { i18n } from './i18n/index.ts';
+import { m } from '../paraglide/messages.js';
 import { formatWhen } from './text.ts';
 
 /** Failures the page can show: the shared contract, or the transport around it. */
@@ -19,8 +19,8 @@ export type DeskError =
 /** Turns one reminder into the active language. */
 export const shownReminder = (notice: ReminderNotice) =>
 	notice.equipmentName === null || notice.equipmentCode === null
-		? i18n.t('reminderMissing', { name: notice.borrowerName })
-		: i18n.t('reminderBody', {
+		? m.reminderMissing({ name: notice.borrowerName })
+		: m.reminderBody({
 				name: notice.borrowerName,
 				equipment: notice.equipmentName,
 				code: notice.equipmentCode,
@@ -30,9 +30,9 @@ export const shownReminder = (notice: ReminderNotice) =>
 const forbiddenCopy = (message: string) => {
 	switch (message) {
 		case 'You can only return your own loan':
-			return i18n.t('returnOwnLoan');
+			return m.returnOwnLoan();
 		case 'Only an admin can record equipment':
-			return i18n.t('adminOnly');
+			return m.adminOnly();
 		default:
 			return message;
 	}
@@ -45,7 +45,7 @@ const takenCopy = (message: string) => {
 	if (index < 0) {
 		return message;
 	}
-	return i18n.t('equipmentCodeTaken', {
+	return m.equipmentCodeTaken({
 		name: message.slice(0, index),
 		code: message.slice(index + marker.length),
 	});
@@ -55,20 +55,20 @@ const takenCopy = (message: string) => {
 export const shown = (error: DeskError) =>
 	Match.value(error).pipe(
 		Match.tag('EquipmentCodeTaken', (failure) => takenCopy(failure.message)),
-		Match.tag('EquipmentNotFound', () => i18n.t('equipmentMissing')),
+		Match.tag('EquipmentNotFound', () => m.equipmentMissing()),
 		Match.tag('Forbidden', (failure) => forbiddenCopy(failure.message)),
-		Match.tag('InvalidLoanPeriod', () => i18n.t('endAfterStart')),
+		Match.tag('InvalidLoanPeriod', () => m.endAfterStart()),
 		Match.tag('LoanConflict', (failure) =>
-			i18n.t('loanConflict', {
+			m.loanConflict({
 				name: failure.borrowerName,
-				start: formatWhen(failure.startsAt, i18n.language),
-				end: formatWhen(failure.endsAt, i18n.language),
+				start: formatWhen(failure.startsAt),
+				end: formatWhen(failure.endsAt),
 			}),
 		),
-		Match.tag('LoanNotFound', () => i18n.t('loanMissing')),
-		Match.tag('Unauthorized', () => i18n.t('requestFailed')),
-		Match.tag('HttpClientError', () => i18n.t('requestFailed')),
-		Match.tag('SchemaError', () => i18n.t('requestFailed')),
+		Match.tag('LoanNotFound', () => m.loanMissing()),
+		Match.tag('Unauthorized', () => m.requestFailed()),
+		Match.tag('HttpClientError', () => m.requestFailed()),
+		Match.tag('SchemaError', () => m.requestFailed()),
 		Match.exhaustive,
 	);
 

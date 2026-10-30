@@ -4,7 +4,6 @@ import { createFileRoute } from '@tanstack/react-router';
 import * as DateTime from 'effect/DateTime';
 import * as Effect from 'effect/Effect';
 import { useMemo, useState, type MouseEvent, type SubmitEvent } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +53,7 @@ import { borrow, returnLoan } from '../lib/api.ts';
 import { run } from '../lib/client.ts';
 import { showFailure } from '../lib/error.ts';
 import { equipmentLabel, fieldValue, formatWhen, toMillis } from '../lib/text.ts';
+import { m } from '../paraglide/messages.js';
 
 /** Loans shown on one page of the record. */
 const pageSize = 5;
@@ -109,7 +109,6 @@ const pageItems = (current: number, count: number): ReadonlyArray<number | 'gap'
 
 /** Booking form and the loan board. */
 const LoansPage = () => {
-	const { t, i18n } = useTranslation();
 	const { user, equipment, loans, refresh } = useSession();
 	const [loanError, setLoanError] = useState('');
 	const [pending, setPending] = useState(false);
@@ -130,23 +129,23 @@ const LoansPage = () => {
 				const overdue = loan.returnedAt === null && millis(loan.endsAt) < now;
 				const status =
 					loan.returnedAt !== null
-						? t('returned', { when: formatWhen(loan.returnedAt, i18n.language) })
+						? m.returned({ when: formatWhen(loan.returnedAt) })
 						: overdue
-							? t('overdue')
-							: t('out');
+							? m.overdue()
+							: m.out();
 				return matchesQuery(
 					query,
 					[
 						item?.code ?? loan.equipmentId,
 						item?.name ?? '',
 						loan.borrowerName,
-						formatWhen(loan.startsAt, i18n.language),
-						formatWhen(loan.endsAt, i18n.language),
+						formatWhen(loan.startsAt),
+						formatWhen(loan.endsAt),
 						status,
 					].join(' '),
 				);
 			}),
-		[equipment, i18n.language, now, orderedLoans, query, t],
+		[equipment, now, orderedLoans, query],
 	);
 	const equipmentId =
 		pickedId !== null && equipment.some((item) => item.id === pickedId)
@@ -157,7 +156,7 @@ const LoansPage = () => {
 		return null;
 	}
 
-	const when = (instant: DateTime.DateTime) => formatWhen(instant, i18n.language);
+	const when = (instant: DateTime.DateTime) => formatWhen(instant);
 	const stillOut = loans.filter((loan) => loan.returnedAt === null).length;
 	const canBook = equipment.length > 0;
 	const equipmentItems = equipment.map((item) => ({
@@ -228,16 +227,16 @@ const LoansPage = () => {
 			{canBook ? (
 				<Card className="w-full max-w-xl">
 					<CardHeader>
-						<CardTitle>{t('borrow')}</CardTitle>
+						<CardTitle>{m.borrow()}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={book}>
 							<FieldGroup>
 								<Field data-invalid={invalid || undefined}>
-									<FieldLabel htmlFor="equipmentId">{t('equipment')}</FieldLabel>
+									<FieldLabel htmlFor="equipmentId">{m.equipment()}</FieldLabel>
 									<Select items={equipmentItems} onValueChange={setPickedId} value={equipmentId}>
 										<SelectTrigger aria-invalid={invalid} className="w-full" id="equipmentId">
-											<SelectValue placeholder={t('equipment')} />
+											<SelectValue placeholder={m.equipment()} />
 										</SelectTrigger>
 										<SelectContent alignItemWithTrigger={false}>
 											<SelectGroup>
@@ -251,7 +250,7 @@ const LoansPage = () => {
 									</Select>
 								</Field>
 								<Field data-invalid={invalid || undefined}>
-									<FieldLabel htmlFor="startsAt">{t('starts')}</FieldLabel>
+									<FieldLabel htmlFor="startsAt">{m.starts()}</FieldLabel>
 									<Input
 										aria-invalid={invalid}
 										id="startsAt"
@@ -261,7 +260,7 @@ const LoansPage = () => {
 									/>
 								</Field>
 								<Field data-invalid={invalid || undefined}>
-									<FieldLabel htmlFor="endsAt">{t('ends')}</FieldLabel>
+									<FieldLabel htmlFor="endsAt">{m.ends()}</FieldLabel>
 									<Input
 										aria-invalid={invalid}
 										id="endsAt"
@@ -277,7 +276,7 @@ const LoansPage = () => {
 									type="submit"
 								>
 									{pending ? <Spinner data-icon="inline-start" /> : null}
-									{t('borrow')}
+									{m.borrow()}
 								</Button>
 							</FieldGroup>
 						</form>
@@ -286,24 +285,24 @@ const LoansPage = () => {
 			) : (
 				<Empty>
 					<EmptyHeader>
-						<EmptyDescription>{t('bookAfterCatalog')}</EmptyDescription>
+						<EmptyDescription>{m.bookAfterCatalog()}</EmptyDescription>
 					</EmptyHeader>
 				</Empty>
 			)}
 			<Card className="min-w-0">
 				<CardHeader className="border-b">
-					<CardTitle>{t('loans')}</CardTitle>
-					<CardDescription>{t('stillOut', { count: stillOut })}</CardDescription>
+					<CardTitle>{m.loans()}</CardTitle>
+					<CardDescription>{m.stillOut({ count: stillOut })}</CardDescription>
 					{loans.length > 0 ? (
 						<CardAction>
 							<Input
-								aria-label={t('search')}
+								aria-label={m.search()}
 								className="w-36 sm:w-56"
 								onChange={(event) => {
 									setQuery(event.target.value);
 									setPage(0);
 								}}
-								placeholder={t('search')}
+								placeholder={m.search()}
 								type="search"
 								value={query}
 							/>
@@ -315,7 +314,7 @@ const LoansPage = () => {
 						<CardContent>
 							<Empty>
 								<EmptyHeader>
-									<EmptyDescription>{t('emptyLoans')}</EmptyDescription>
+									<EmptyDescription>{m.emptyLoans()}</EmptyDescription>
 								</EmptyHeader>
 							</Empty>
 						</CardContent>
@@ -324,7 +323,7 @@ const LoansPage = () => {
 					<CardContent>
 						<Empty>
 							<EmptyHeader>
-								<EmptyDescription>{t('noMatches')}</EmptyDescription>
+								<EmptyDescription>{m.noMatches()}</EmptyDescription>
 							</EmptyHeader>
 						</Empty>
 					</CardContent>
@@ -333,12 +332,12 @@ const LoansPage = () => {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>{t('number')}</TableHead>
-									<TableHead>{t('equipmentName')}</TableHead>
-									<TableHead>{t('borrower')}</TableHead>
-									<TableHead>{t('starts')}</TableHead>
-									<TableHead>{t('ends')}</TableHead>
-									<TableHead>{t('return')}</TableHead>
+									<TableHead>{m.number()}</TableHead>
+									<TableHead>{m.equipmentName()}</TableHead>
+									<TableHead>{m.borrower()}</TableHead>
+									<TableHead>{m.starts()}</TableHead>
+									<TableHead>{m.ends()}</TableHead>
+									<TableHead>{m.return()}</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -360,7 +359,7 @@ const LoansPage = () => {
 											<TableCell className="tabular-nums">{when(loan.endsAt)}</TableCell>
 											<TableCell>
 												<div className="flex items-center gap-2">
-													{overdue ? <Badge variant="destructive">{t('overdue')}</Badge> : null}
+													{overdue ? <Badge variant="destructive">{m.overdue()}</Badge> : null}
 													{canReturn ? (
 														<Button
 															aria-busy={returning}
@@ -373,14 +372,14 @@ const LoansPage = () => {
 															variant="outline"
 														>
 															{returning ? <Spinner data-icon="inline-start" /> : null}
-															{t('return')}
+															{m.return()}
 														</Button>
 													) : loan.returnedAt !== null ? (
 														<Badge variant="outline">
-															{t('returned', { when: when(loan.returnedAt) })}
+															{m.returned({ when: when(loan.returnedAt) })}
 														</Badge>
 													) : overdue ? null : (
-														<Badge variant="secondary">{t('out')}</Badge>
+														<Badge variant="secondary">{m.out()}</Badge>
 													)}
 												</div>
 											</TableCell>
@@ -393,12 +392,12 @@ const LoansPage = () => {
 				)}
 				{filteredLoans.length > 0 ? (
 					<CardFooter className="justify-center">
-						<Pagination aria-label={t('pagination')}>
+						<Pagination aria-label={m.pagination()}>
 							<PaginationContent>
 								<PaginationItem>
 									<PaginationPrevious
 										aria-disabled={current === 0}
-										aria-label={t('previousPage')}
+										aria-label={m.previousPage()}
 										className={current === 0 ? 'pointer-events-none opacity-50' : ''}
 										href="#loans"
 										onClick={
@@ -408,7 +407,7 @@ const LoansPage = () => {
 													}
 												: goTo(current - 1)
 										}
-										text={t('previousPage')}
+										text={m.previousPage()}
 									/>
 								</PaginationItem>
 								{pageItems(current, pageCount).map((item, index) =>
@@ -422,7 +421,7 @@ const LoansPage = () => {
 												href="#loans"
 												isActive={item === current}
 												onClick={goTo(item)}
-												aria-label={t('pageNumber', { page: item + 1 })}
+												aria-label={m.pageNumber({ page: item + 1 })}
 											>
 												{item + 1}
 											</PaginationLink>
@@ -432,7 +431,7 @@ const LoansPage = () => {
 								<PaginationItem>
 									<PaginationNext
 										aria-disabled={current >= pageCount - 1}
-										aria-label={t('nextPage')}
+										aria-label={m.nextPage()}
 										className={current >= pageCount - 1 ? 'pointer-events-none opacity-50' : ''}
 										href="#loans"
 										onClick={
@@ -442,7 +441,7 @@ const LoansPage = () => {
 													}
 												: goTo(current + 1)
 										}
-										text={t('nextPage')}
+										text={m.nextPage()}
 									/>
 								</PaginationItem>
 							</PaginationContent>

@@ -4,7 +4,7 @@ import * as Effect from 'effect/Effect';
 import * as Option from 'effect/Option';
 import * as Schema from 'effect/Schema';
 
-import { i18n } from '../lib/i18n/index.ts';
+import { m } from '../paraglide/messages.js';
 
 /** Better Auth error body that carries a sentence. */
 const AuthErrorBody = Schema.Struct({
@@ -30,7 +30,7 @@ const authClient = createAuthClient({
 /** Turns a thrown Auth failure into Unauthorized. */
 const unauthorized = (cause: unknown) => {
 	const decoded = Schema.decodeUnknownOption(AuthErrorBody)(cause);
-	const message = Option.isSome(decoded) ? decoded.value.message : i18n.t('requestFailed');
+	const message = Option.isSome(decoded) ? decoded.value.message : m.requestFailed();
 	return new Unauthorized({ message });
 };
 

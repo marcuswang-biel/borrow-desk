@@ -18,8 +18,7 @@ catalog:
   '@vitejs/plugin-react': 6.1.2
   tailwindcss: 4.3.3
   vite: 8.3.5
-  i18next: 26.5.11
-  react-i18next: 17.1.9
+  '@inlang/paraglide-js': 2.29.3
   turbo: 2.10.12
   jose: 6.2.13
   '@neondatabase/auth': 0.7.0-beta
@@ -41,5 +40,4 @@ minimumReleaseAgeExclude:
   - better-auth@1.7.6
   - pg@8.23.1
   - '@types/pg@8.23.1'
-  - i18next@26.5.11
-  - react-i18next@17.1.9
+  - '@inlang/paraglide-js@2.29.3'

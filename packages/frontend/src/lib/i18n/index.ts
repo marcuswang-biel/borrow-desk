@@ -1,9 +1,7 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import type { Role } from '@borrow-desk/api';
 
-import { en } from './en.ts';
-import { zhHant } from './zh-Hant.ts';
-import { zh } from './zh.ts';
+import { m } from '../../paraglide/messages.js';
+import { defineCustomClientStrategy, getLocale, setLocale } from '../../paraglide/runtime.js';
 
 /** Languages the desk can show. */
 export const locales = ['en', 'zh', 'zh-Hant'] as const;
@@ -14,8 +12,12 @@ export type Locale = (typeof locales)[number];
 /** localStorage key for the chosen language. */
 const storageKey = 'borrow-desk.locale';
 
+/** True when the value is one of the desk languages. */
+const isLocale = (value: string | null): value is Locale =>
+	value === 'en' || value === 'zh' || value === 'zh-Hant';
+
 /** Maps a browser or stored tag onto one desk language. */
-export const activeLocale = (language: string): Locale => {
+const activeLocale = (language: string): Locale => {
 	const tag = language.toLowerCase();
 	if (
 		tag === 'zh-hant' ||
@@ -34,7 +36,7 @@ export const activeLocale = (language: string): Locale => {
 
 /** BCP 47 tag for the document and for `Intl` dates. */
 export const localeTag = (language: string) => {
-	const locale = activeLocale(language);
+	const locale = isLocale(language) ? language : activeLocale(language);
 	if (locale === 'zh-Hant') {
 		return 'zh-Hant';
 	}
@@ -48,49 +50,44 @@ export const localeTag = (language: string) => {
 const readStoredLocale = (): Locale | undefined => {
 	try {
 		const stored = localStorage.getItem(storageKey);
-		if (stored === 'en' || stored === 'zh' || stored === 'zh-Hant') {
-			return stored;
-		}
+		return isLocale(stored) ? stored : undefined;
 	} catch {
 		return undefined;
 	}
-	return undefined;
 };
 
-/** Picks Chinese when the browser asks for it and nothing is stored. */
-export const readLocale = (): Locale => {
-	const stored = readStoredLocale();
-	if (stored !== undefined) {
-		return stored;
-	}
-	return activeLocale(navigator.language);
-};
-
-/** Language chosen before the first render. */
-const initialLocale = readLocale();
-
-document.documentElement.lang = localeTag(initialLocale);
-
-void i18n.use(initReactI18next).init({
-	resources: {
-		en: { translation: en },
-		zh: { translation: zh },
-		'zh-Hant': { translation: zhHant },
+defineCustomClientStrategy('custom-desk', {
+	getLocale: () => {
+		const stored = readStoredLocale();
+		if (stored !== undefined) {
+			return stored;
+		}
+		if (typeof navigator === 'undefined') {
+			return undefined;
+		}
+		return activeLocale(navigator.language);
 	},
-	lng: initialLocale,
-	fallbackLng: 'en',
-	interpolation: { escapeValue: false },
+	setLocale: (next) => {
+		if (!isLocale(next)) {
+			return;
+		}
+		try {
+			localStorage.setItem(storageKey, next);
+		} catch {
+			// The page still switches for this visit.
+		}
+	},
 });
 
-/** Stores the language and applies it to i18next and the document. */
+document.documentElement.lang = localeTag(getLocale());
+
+/** Stores the language and reloads so the new copy and document language arrive together. */
 export const changeLocale = (next: Locale) => {
-	try {
-		localStorage.setItem(storageKey, next);
-	} catch {
-		// The page still switches for this visit.
-	}
 	document.documentElement.lang = localeTag(next);
-	return i18n.changeLanguage(next);
+	setLocale(next);
 };
 
-export { i18n };
+/** Role name in the active language. */
+export const roleLabel = (role: Role) => (role === 'admin' ? m.roleAdmin() : m.roleEmployee());
+
+export { getLocale };
