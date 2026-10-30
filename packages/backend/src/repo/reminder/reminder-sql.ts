@@ -6,28 +6,27 @@ import { SqlClient } from 'effect/sql/SqlClient';
 import * as SqlSchema from 'effect/sql/SqlSchema';
 
 import { asDefect } from '../../sql/defect.ts';
-import { DbInstant, millis } from '../../sql/instant.ts';
+import { DbMillis, millis } from '../../sql/instant.ts';
 import { Reminder } from './reminder.ts';
 
-/** One reminder row with columns aliased to the domain names. */
-const ReminderRow = Schema.Struct({
+/** Reminder row as PostgreSQL returns it, decoded once into the notice. */
+const ReminderFromRow = Schema.Struct({
 	loanId: Schema.String,
 	userId: Schema.String,
 	borrowerName: Schema.String,
 	equipmentName: Schema.NullOr(Schema.String),
 	equipmentCode: Schema.NullOr(Schema.String),
-	sentAt: DbInstant,
-});
+	sentAt: DbMillis,
+}).pipe(Schema.decodeTo(ReminderNotice));
 
 /** Outbox backed by the reminders table. */
 export const ReminderSql = Layer.effect(
 	Reminder,
 	Effect.gen(function* () {
 		const sql = yield* SqlClient;
-		const decode = Schema.decodeUnknownEffect(ReminderNotice);
 		const read = SqlSchema.findAll({
 			Request: Schema.Void,
-			Result: ReminderRow,
+			Result: ReminderFromRow,
 			execute: () =>
 				sql`select loan_id as "loanId", user_id as "userId", borrower_name as "borrowerName", equipment_name as "equipmentName", equipment_code as "equipmentCode", sent_at::float8 as "sentAt" from reminders order by sent_at`,
 		});
@@ -52,7 +51,7 @@ export const ReminderSql = Layer.effect(
 			`;
 		}, asDefect);
 		const list = Effect.fn('Reminder.list')(function* () {
-			return yield* Effect.forEach(yield* read(), (row) => decode(row));
+			return yield* read();
 		}, asDefect);
 		return Reminder.of({ send, list });
 	}),

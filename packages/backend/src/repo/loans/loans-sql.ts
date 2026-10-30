@@ -7,36 +7,34 @@ import { SqlClient } from 'effect/sql/SqlClient';
 import * as SqlSchema from 'effect/sql/SqlSchema';
 
 import { asDefect } from '../../sql/defect.ts';
-import { DbInstant, DbInstantOrNull, millis } from '../../sql/instant.ts';
+import { DbMillis, DbMillisOrNull, millis } from '../../sql/instant.ts';
 import { LoanRepo } from './loans.ts';
 
-/** One loan row with columns aliased to the domain names. */
-const LoanRow = Schema.Struct({
+/** Loan row as PostgreSQL returns it, decoded once into the booking. */
+export const LoanFromRow = Schema.Struct({
 	id: Schema.String,
 	equipmentId: Schema.String,
 	borrowerId: Schema.String,
 	borrowerName: Schema.String,
-	startsAt: DbInstant,
-	endsAt: DbInstant,
-	returnedAt: DbInstantOrNull,
-});
+	startsAt: DbMillis,
+	endsAt: DbMillis,
+	returnedAt: DbMillisOrNull,
+}).pipe(Schema.decodeTo(Loan));
 
 /** Ledger backed by the loans table. */
 export const LoanRepoSql = Layer.effect(
 	LoanRepo,
 	Effect.gen(function* () {
 		const sql = yield* SqlClient;
-		const decode = Schema.decodeUnknownEffect(Loan);
-		const toLoan = (row: typeof LoanRow.Type) => decode(row);
 		const read = SqlSchema.findAll({
 			Request: Schema.Void,
-			Result: LoanRow,
+			Result: LoanFromRow,
 			execute: () =>
 				sql`select id, equipment_id as "equipmentId", borrower_id as "borrowerId", borrower_name as "borrowerName", starts_at::float8 as "startsAt", ends_at::float8 as "endsAt", returned_at::float8 as "returnedAt" from loans order by starts_at`,
 		});
 		const findByIdQuery = SqlSchema.findAll({
 			Request: Schema.String,
-			Result: LoanRow,
+			Result: LoanFromRow,
 			execute: (id) =>
 				sql`select id, equipment_id as "equipmentId", borrower_id as "borrowerId", borrower_name as "borrowerName", starts_at::float8 as "startsAt", ends_at::float8 as "endsAt", returned_at::float8 as "returnedAt" from loans where id = ${id}`,
 		});
@@ -46,7 +44,7 @@ export const LoanRepoSql = Layer.effect(
 				startsAt: Schema.Number,
 				endsAt: Schema.Number,
 			}),
-			Result: LoanRow,
+			Result: LoanFromRow,
 			execute: (request) => sql`
 				select id, equipment_id as "equipmentId", borrower_id as "borrowerId", borrower_name as "borrowerName", starts_at::float8 as "startsAt", ends_at::float8 as "endsAt", returned_at::float8 as "returnedAt"
 				from loans
@@ -59,7 +57,7 @@ export const LoanRepoSql = Layer.effect(
 		});
 		const overdueQuery = SqlSchema.findAll({
 			Request: Schema.Number,
-			Result: LoanRow,
+			Result: LoanFromRow,
 			execute: (now) => sql`
 				select id, equipment_id as "equipmentId", borrower_id as "borrowerId", borrower_name as "borrowerName", starts_at::float8 as "startsAt", ends_at::float8 as "endsAt", returned_at::float8 as "returnedAt"
 				from loans
@@ -70,13 +68,12 @@ export const LoanRepoSql = Layer.effect(
 		});
 
 		const list = Effect.fn('LoanRepo.list')(function* () {
-			return yield* Effect.forEach(yield* read(), toLoan);
+			return yield* read();
 		}, asDefect);
 
 		const findById = Effect.fn('LoanRepo.findById')(function* (id: string) {
 			const rows = yield* findByIdQuery(id);
-			const row = rows[0];
-			return row === undefined ? undefined : yield* toLoan(row);
+			return rows[0];
 		}, asDefect);
 
 		const findOverlap = Effect.fn('LoanRepo.findOverlap')(function* (
@@ -89,8 +86,7 @@ export const LoanRepoSql = Layer.effect(
 				startsAt: millis(startsAt),
 				endsAt: millis(endsAt),
 			});
-			const row = rows[0];
-			return row === undefined ? undefined : yield* toLoan(row);
+			return rows[0];
 		}, asDefect);
 
 		const insertIfFree = Effect.fn('LoanRepo.insertIfFree')(function* (loan: Loan) {
@@ -126,7 +122,7 @@ export const LoanRepoSql = Layer.effect(
 		}, asDefect);
 
 		const listOverdue = Effect.fn('LoanRepo.listOverdue')(function* (now: DateTime.Utc) {
-			return yield* Effect.forEach(yield* overdueQuery(millis(now)), toLoan);
+			return yield* overdueQuery(millis(now));
 		}, asDefect);
 
 		return LoanRepo.of({ list, findById, insertIfFree, markReturned, listOverdue });
