@@ -1,4 +1,4 @@
-/** Copy shared by English and Chinese. Interpolation uses i18next `{{name}}` slots. */
+/** Copy shared by English, Simplified Chinese, and Traditional Chinese. */
 export type Messages = {
 	title: string;
 	language: string;
@@ -19,7 +19,8 @@ export type Messages = {
 	remindersTitle: string;
 	close: string;
 	emptyReminders: string;
-	name: string;
+	equipmentName: string;
+	personName: string;
 	email: string;
 	password: string;
 	signIn: string;
@@ -36,6 +37,12 @@ export type Messages = {
 	ends: string;
 	borrow: string;
 	emptyLoans: string;
+	search: string;
+	noMatches: string;
+	pagination: string;
+	previousPage: string;
+	nextPage: string;
+	pageNumber: string;
 	loanRange: string;
 	return: string;
 	returned: string;
@@ -44,6 +51,17 @@ export type Messages = {
 	missing: string;
 	goToEquipment: string;
 	goToSignIn: string;
+	endAfterStart: string;
+	equipmentMissing: string;
+	loanMissing: string;
+	returnOwnLoan: string;
+	adminOnly: string;
+	equipmentNameEmpty: string;
+	equipmentNumberEmpty: string;
+	equipmentCodeTaken: string;
+	loanConflict: string;
+	reminderBody: string;
+	reminderMissing: string;
 	role: {
 		admin: string;
 		employee: string;

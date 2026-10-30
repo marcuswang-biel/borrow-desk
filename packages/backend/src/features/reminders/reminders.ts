@@ -59,9 +59,10 @@ export const scanOverdue = Effect.gen(function* () {
 });
 
 /**
- * Runs the overdue scan on a one-minute schedule.
- * This fiber lives in the long-running Node process, not in a serverless request.
+ * Runs the overdue scan on a one-minute schedule inside the long-running server.
+ * The fiber is scoped to that server, so interrupting the process stops it.
+ * A serverless request does not start this fiber.
  */
 export const ReminderScheduleLive = Layer.effectDiscard(
-	scanOverdue.pipe(Effect.repeat(Schedule.spaced('1 minute')), Effect.forkDetach),
+	scanOverdue.pipe(Effect.repeat(Schedule.spaced('1 minute')), Effect.forkScoped),
 );

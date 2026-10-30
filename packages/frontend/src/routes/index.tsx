@@ -8,6 +8,7 @@ import { LoansPage } from './loans.tsx';
 import { MissingPage } from './missing.tsx';
 import { SignInPage } from './sign-in.tsx';
 
+/** Sidebar links for the catalog and the loan board. */
 export const routes = [
 	{ to: '/equipment', tTag: 'equipment' },
 	{ to: '/loans', tTag: 'loans' },

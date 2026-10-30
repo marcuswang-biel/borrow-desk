@@ -50,7 +50,7 @@ export const LoanRepoSql = Layer.effect(
 				`.pipe(Effect.asVoid, Effect.orDie),
 			list: () =>
 				sql<LoanRow>`select id, equipment_id, borrower_id, borrower_name, starts_at, ends_at, returned_at from loans order by starts_at`.pipe(
-					Effect.map((rows) => rows.map(toLoan)),
+					Effect.map((rows) => rows.map((row) => toLoan(row))),
 					Effect.orDie,
 				),
 			findById: (id) =>
@@ -90,7 +90,7 @@ export const LoanRepoSql = Layer.effect(
 						and ends_at < ${now}
 						and not exists (select 1 from reminders where reminders.loan_id = loans.id)
 				`.pipe(
-					Effect.map((rows) => rows.map(toLoan)),
+					Effect.map((rows) => rows.map((row) => toLoan(row))),
 					Effect.orDie,
 				),
 		};

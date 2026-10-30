@@ -35,7 +35,7 @@ export const EquipmentRepoSql = Layer.effect(
 				),
 			list: () =>
 				sql<EquipmentRow>`select id, name, code, created_at from equipment order by name, code`.pipe(
-					Effect.map((rows) => rows.map(toEquipment)),
+					Effect.map((rows) => rows.map((row) => toEquipment(row))),
 					Effect.orDie,
 				),
 			findById: (id) =>

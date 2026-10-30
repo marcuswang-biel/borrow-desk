@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { TooltipProvider } from '@/components/ui/tooltip';
+
 import './lib/i18n/index.ts';
 import { AppRoutes } from './routes/index.tsx';
 import './styles.css';
@@ -13,6 +15,8 @@ if (root === null) {
 
 createRoot(root).render(
 	<StrictMode>
-		<AppRoutes />
+		<TooltipProvider>
+			<AppRoutes />
+		</TooltipProvider>
 	</StrictMode>,
 );

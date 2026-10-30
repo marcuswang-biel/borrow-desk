@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router';
 
+import { Skeleton } from '@/components/ui/skeleton';
+
 import { SignInPanel, useSession } from '../auth/index.ts';
-import { meta, signIn, skeleton, skeletonShort, skeletonShorter } from '../lib/ui.ts';
 
 /** Sign-in route. A restored session goes to the catalog. */
 export const SignInPage = () => {
@@ -11,11 +12,11 @@ export const SignInPage = () => {
 
 	if (status === 'loading') {
 		return (
-			<div>
-				<p className={meta}>{t('checkingSession')}</p>
-				<div className={skeleton} />
-				<div className={skeletonShort} />
-				<div className={skeletonShorter} />
+			<div className="mx-auto flex w-full max-w-md flex-col gap-3">
+				<p className="text-muted-foreground m-0 text-sm">{t('checkingSession')}</p>
+				<Skeleton className="h-8 w-40" />
+				<Skeleton className="h-10 w-full" />
+				<Skeleton className="h-10 w-full" />
 			</div>
 		);
 	}
@@ -24,7 +25,7 @@ export const SignInPage = () => {
 	}
 
 	return (
-		<div className={signIn}>
+		<div className="flex justify-center py-8">
 			<SignInPanel />
 		</div>
 	);

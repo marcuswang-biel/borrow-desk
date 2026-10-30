@@ -18,6 +18,6 @@ export const equipmentLabel = (item: Equipment) => `${item.name} ${item.code}`;
 /** Formats epoch milliseconds in the active language. */
 export const formatWhen = (millis: number, language: string) =>
 	new Intl.DateTimeFormat(localeTag(language), {
-		dateStyle: 'medium',
+		dateStyle: 'short',
 		timeStyle: 'short',
 	}).format(millis);

@@ -4,6 +4,9 @@
 		"outDir": "build",
 		"tsBuildInfoFile": "build/tsconfig.tsbuildinfo",
 		"rootDir": "src",
+		"paths": {
+			"@/*": ["./src/*"]
+		},
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"jsx": "react-jsx",
 		"types": []
