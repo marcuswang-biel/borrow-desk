@@ -4,7 +4,12 @@
 	"categories": {
 		"correctness": "error"
 	},
-	"ignorePatterns": ["**/node_modules/**", "**/dist/**", "**/.pnpm-store/**"],
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/dist/**",
+		"**/.pnpm-store/**",
+		"**/routeTree.gen.ts"
+	],
 	"overrides": [
 		{
 			"files": ["packages/api/**/*.ts"],

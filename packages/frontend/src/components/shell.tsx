@@ -1,10 +1,10 @@
 import type { ReminderNotice } from '@borrow-desk/api';
 
+import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import * as Effect from 'effect/Effect';
 import { BellIcon, BoxesIcon, CalendarClockIcon, GlobeIcon, PackageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -58,7 +58,12 @@ import {
 	shownReminder,
 	type DeskError,
 } from '../lib/index.ts';
-import { routes } from '../routes/index.tsx';
+
+/** Sidebar links for the catalog and the loan board. */
+const routes = [
+	{ to: '/equipment', tTag: 'equipment' },
+	{ to: '/loans', tTag: 'loans' },
+] as const;
 
 /** Digits on the reminder bell when the count is at least 1. Counts of 100 or more show as 99+. */
 const reminderBadgeCount = (count: number) => (count >= 100 ? '99+' : String(count));
@@ -113,7 +118,7 @@ const DeskFrame = () => {
 	const { t, i18n } = useTranslation();
 	const { status, user, reminders, replaceReminders, signOut } = useSession();
 	const navigate = useNavigate();
-	const { pathname } = useLocation();
+	const pathname = useRouterState({ select: (state) => state.location.pathname });
 	const { setOpenMobile } = useSidebar();
 	const [remindersOpen, setRemindersOpen] = useState(false);
 	const [reminderError, setReminderError] = useState('');
@@ -167,7 +172,7 @@ const DeskFrame = () => {
 					Effect.sync(() => {
 						setRemindersOpen(false);
 						setOpenMobile(false);
-						navigate('/');
+						navigate({ to: '/' });
 					}),
 				),
 				Effect.catch((error) =>
@@ -185,6 +190,7 @@ const DeskFrame = () => {
 	};
 
 	const home = status === 'signed-in' ? '/equipment' : '/';
+	const brand = status === 'signed-in' ? <Link to="/equipment" /> : <Link to="/" />;
 
 	return (
 		<>
@@ -194,7 +200,7 @@ const DeskFrame = () => {
 						<SidebarMenuItem>
 							<SidebarMenuButton
 								className="[&_svg]:size-6"
-								render={<Link to={home} />}
+								render={brand}
 								size="lg"
 								onClick={() => {
 									setOpenMobile(false);
@@ -219,7 +225,7 @@ const DeskFrame = () => {
 												onClick={() => {
 													setOpenMobile(false);
 												}}
-												render={<NavLink to={route.to} />}
+												render={<Link to={route.to} />}
 											>
 												{route.tTag === 'equipment' ? <PackageIcon /> : <CalendarClockIcon />}
 												<span>{t(route.tTag)}</span>

@@ -43,7 +43,7 @@ Use one pnpm and Turbo workspace with three packages: an Effect v4 backend, a sh
 | Tests           | In-memory Layers; real Postgres or testcontainers                                                            | In-memory Layers         | Overlap, permission, and overdue tests stay fast and deterministic, with `TestClock` controlling time.                                                                         |
 | Tooling         | pnpm + Turbo; one package; Nx                                                                                | pnpm + Turbo             | A small explicit workspace shares packages and caches builds without another framework.                                                                                        |
 
-The workspace runs Node 24 with pnpm 12 and Turbo. TypeScript project references connect the packages. The page uses React 19, Vite 8, Tailwind 4, react-router, and i18next; tests use Vitest 5 with `@effect/vitest`; oxlint and oxfmt handle linting and formatting.
+The workspace runs Node 24 with pnpm 12 and Turbo. TypeScript project references connect the packages. The page uses React 19, Vite 8, Tailwind 4, TanStack Router, TanStack Redact, and i18next; tests use Vitest 5 with `@effect/vitest`; oxlint and oxfmt handle linting and formatting.
 
 ## Consequences
 

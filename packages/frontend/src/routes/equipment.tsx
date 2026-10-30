@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router';
 import * as Effect from 'effect/Effect';
 import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/table';
 
 import { useSession } from '../auth/index.ts';
+import { RequireSession } from '../components/require-session.tsx';
 import { createEquipment } from '../lib/api.ts';
 import { run } from '../lib/client.ts';
 import { showFailure } from '../lib/error.ts';
@@ -37,7 +39,7 @@ const matchesQuery = (query: string, text: string): boolean => {
 };
 
 /** Catalog. An admin can record a kind and a number. */
-export const EquipmentPage = () => {
+const EquipmentPage = () => {
 	const { t } = useTranslation();
 	const { user, equipment, refresh } = useSession();
 	const [equipmentError, setEquipmentError] = useState('');
@@ -183,3 +185,15 @@ export const EquipmentPage = () => {
 		</section>
 	);
 };
+
+/** Catalog route. A signed-out visitor goes back to sign-in. */
+const EquipmentRoute = () => (
+	<RequireSession>
+		<EquipmentPage />
+	</RequireSession>
+);
+
+/** Catalog page. An admin can record a kind and a number. */
+export const Route = createFileRoute('/equipment')({
+	component: EquipmentRoute,
+});

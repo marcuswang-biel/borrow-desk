@@ -1,7 +1,8 @@
 import type { Loan } from '@borrow-desk/api';
 
+import { createFileRoute } from '@tanstack/react-router';
 import * as Effect from 'effect/Effect';
-import { useMemo, useState, type FormEvent, type MouseEvent } from 'react';
+import { useMemo, useState, type MouseEvent, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -47,6 +48,7 @@ import {
 } from '@/components/ui/table';
 
 import { useSession } from '../auth/index.ts';
+import { RequireSession } from '../components/require-session.tsx';
 import { borrow, returnLoan } from '../lib/api.ts';
 import { run } from '../lib/client.ts';
 import { showFailure } from '../lib/error.ts';
@@ -55,10 +57,11 @@ import { equipmentLabel, fieldValue, formatWhen, toMillis } from '../lib/text.ts
 /** Loans shown on one page of the record. */
 const pageSize = 5;
 
-/** Overdue loans first. Inside each group, the later start comes first. */
+/** Show Overdue loans first. Inside each group, the later start comes first. */
 const compareLoans = (now: number, left: Loan, right: Loan): number => {
 	const leftOverdue = left.returnedAt === null && left.endsAt < now;
 	const rightOverdue = right.returnedAt === null && right.endsAt < now;
+	/** If Left overdue loan not equal right overdue loan */
 	if (leftOverdue !== rightOverdue) {
 		return leftOverdue ? -1 : 1;
 	}
@@ -101,7 +104,7 @@ const pageItems = (current: number, count: number): ReadonlyArray<number | 'gap'
 };
 
 /** Booking form and the loan board. */
-export const LoansPage = () => {
+const LoansPage = () => {
 	const { t, i18n } = useTranslation();
 	const { user, equipment, loans, refresh } = useSession();
 	const [loanError, setLoanError] = useState('');
@@ -167,7 +170,7 @@ export const LoansPage = () => {
 		setPage(next);
 	};
 
-	const book = (event: FormEvent<HTMLFormElement>) => {
+	const book = (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		if (pending || equipmentId === null) {
 			return;
@@ -453,3 +456,15 @@ export const LoansPage = () => {
 		</section>
 	);
 };
+
+/** Loan route. A signed-out visitor goes back to sign-in. */
+const LoansRoute = () => (
+	<RequireSession>
+		<LoansPage />
+	</RequireSession>
+);
+
+/** Loan board. Overdue loans stay first, then the later start. */
+export const Route = createFileRoute('/loans')({
+	component: LoansRoute,
+});

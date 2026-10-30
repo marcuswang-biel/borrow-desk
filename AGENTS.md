@@ -10,7 +10,7 @@ This repository does not use Convex. The backend is Effect v4.
 
 `packages/backend` follows the http-server split. Product features live in `src/features`: each folder holds Policy, the use-case service, and Http, and exposes them from `index.ts`. Repositories live in `src/repo`: each concept has its own folder, with the port and the SQL implementation exposed from that folder's `index.ts`. The folder is also exposed from `src/repo/index.ts`. In-memory repositories used by tests live in `packages/backend/test`. PostgreSQL connection and migrations live in `src/sql` and are exposed from `src/sql/index.ts`. Migration files are named `<YYYYMMDDNN>_<name>.ts` and loaded from `src/sql/migrations`. Better Auth is mounted at `/api/auth` and exposed from `src/auth/index.ts`.
 
-`packages/frontend` is React 19. It calls the API through `HttpApiClient` generated from `packages/api`. `src/auth` is the session and the sign-in panel, and other folders import that folder's `index.ts`. `src/components` is the frame and the session gate. `src/lib` is the client, the shared failures, and the languages. `src/routes` is one file per page.
+`packages/frontend` is React 19 on TanStack Redact, with TanStack Router file routes. It calls the API through `HttpApiClient` generated from `packages/api`. `src/auth` is the session and the sign-in panel, and other folders import that folder's `index.ts`. `src/components` is the frame and the session gate. `src/lib` is the client, the shared failures, and the languages. `src/routes` is one file per page.
 
 ## Commands
 

@@ -23,5 +23,5 @@
 	"sortTailwindcss": {
 		"functions": ["cn", "clsx", "cva"]
 	},
-	"ignorePatterns": ["node_modules", "dist", "pnpm-lock.yaml"]
+	"ignorePatterns": ["node_modules", "dist", "pnpm-lock.yaml", "routeTree.gen.ts"]
 }

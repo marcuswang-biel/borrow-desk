@@ -1,33 +1,37 @@
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { createFileRoute, Navigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
-import { SessionProvider } from '../auth/index.ts';
-import { RequireSession } from '../components/require-session.tsx';
-import { Shell } from '../components/shell.tsx';
-import { EquipmentPage } from './equipment.tsx';
-import { LoansPage } from './loans.tsx';
-import { MissingPage } from './missing.tsx';
-import { SignInPage } from './sign-in.tsx';
+import { Skeleton } from '@/components/ui/skeleton';
 
-/** Sidebar links for the catalog and the loan board. */
-export const routes = [
-	{ to: '/equipment', tTag: 'equipment' },
-	{ to: '/loans', tTag: 'loans' },
-] as const;
+import { SignInPanel, useSession } from '../auth/index.ts';
 
-/** Browser routes. Sign-in is `/`. The catalog and the loan board require a session. */
-export const AppRoutes = () => (
-	<BrowserRouter>
-		<SessionProvider>
-			<Routes>
-				<Route element={<Shell />}>
-					<Route index element={<SignInPage />} />
-					<Route element={<RequireSession />}>
-						<Route path="equipment" element={<EquipmentPage />} />
-						<Route path="loans" element={<LoansPage />} />
-					</Route>
-					<Route path="*" element={<MissingPage />} />
-				</Route>
-			</Routes>
-		</SessionProvider>
-	</BrowserRouter>
-);
+/** Sign-in route. A restored session goes to the catalog. */
+const SignInPage = () => {
+	const { t } = useTranslation();
+	const { status } = useSession();
+
+	if (status === 'loading') {
+		return (
+			<div className="mx-auto flex w-full max-w-md flex-col gap-3">
+				<p className="text-muted-foreground m-0 text-sm">{t('checkingSession')}</p>
+				<Skeleton className="h-8 w-40" />
+				<Skeleton className="h-10 w-full" />
+				<Skeleton className="h-10 w-full" />
+			</div>
+		);
+	}
+	if (status === 'signed-in') {
+		return <Navigate to="/equipment" replace />;
+	}
+
+	return (
+		<div className="flex justify-center py-8">
+			<SignInPanel />
+		</div>
+	);
+};
+
+/** Public sign-in page at `/`. */
+export const Route = createFileRoute('/')({
+	component: SignInPage,
+});

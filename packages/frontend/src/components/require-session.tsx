@@ -1,12 +1,13 @@
+import { Navigate } from '@tanstack/react-router';
+import { type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, Outlet } from 'react-router';
 
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useSession } from '../auth/index.ts';
 
-/** Sends a signed-out visitor back to sign-in. */
-export const RequireSession = () => {
+/** Sends a signed-out visitor back to sign-in, then renders the page. */
+export const RequireSession = ({ children }: { children: ReactNode }) => {
 	const { t } = useTranslation();
 	const { status } = useSession();
 	if (status === 'loading') {
@@ -22,5 +23,5 @@ export const RequireSession = () => {
 	if (status !== 'signed-in') {
 		return <Navigate to="/" replace />;
 	}
-	return <Outlet />;
+	return children;
 };

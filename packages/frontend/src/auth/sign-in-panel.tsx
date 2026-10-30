@@ -1,7 +1,7 @@
+import { useNavigate } from '@tanstack/react-router';
 import * as Effect from 'effect/Effect';
 import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,7 +55,7 @@ export const SignInPanel = () => {
 				Effect.andThen(refresh),
 				Effect.tap(() =>
 					Effect.sync(() => {
-						navigate('/equipment');
+						navigate({ to: '/equipment' });
 					}),
 				),
 				showFailure(setAuthError),
