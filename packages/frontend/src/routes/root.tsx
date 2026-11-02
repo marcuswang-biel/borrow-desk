@@ -1,6 +1,6 @@
 import { createRootRoute } from '@tanstack/react-router';
 
-import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 
 import { SessionProvider, SignInPanel, useSession } from '../auth/index.ts';
 import { LanguageSelect, Shell } from '../components/shell.tsx';
@@ -9,11 +9,8 @@ import { MissingPage } from './miss.tsx';
 
 /** Session check shown before any page. */
 const SessionPending = () => (
-	<div className="flex w-full max-w-md flex-col gap-3">
-		<p className="text-muted-foreground m-0 text-sm">{m.checkingSession()}</p>
-		<Skeleton className="h-8 w-40" />
-		<Skeleton className="h-10 w-full" />
-		<Skeleton className="h-10 w-full" />
+	<div className="flex h-full items-center justify-center pt-8">
+		<Spinner aria-label={m.checkingSession()} className="size-6" />
 	</div>
 );
 
