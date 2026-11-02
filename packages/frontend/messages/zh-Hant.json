@@ -55,6 +55,7 @@
 	"bookAfterCatalog": "目錄裡有設備之後，才能預約借用。",
 	"starts": "開始",
 	"ends": "結束",
+	"time": "時間",
 	"borrow": "借用",
 	"emptyLoans": "還沒有借用。請在表單裡預約一筆。",
 	"search": "搜尋",

@@ -58,6 +58,7 @@
 	"bookAfterCatalog": "Book a loan after the catalog has equipment.",
 	"starts": "Starts",
 	"ends": "Ends",
+	"time": "Time",
 	"borrow": "Borrow",
 	"emptyLoans": "No loans yet. Book one in the form.",
 	"search": "Search",

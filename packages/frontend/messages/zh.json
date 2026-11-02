@@ -55,6 +55,7 @@
 	"bookAfterCatalog": "目录里有设备之后，才能预约借用。",
 	"starts": "开始",
 	"ends": "结束",
+	"time": "时间",
 	"borrow": "借用",
 	"emptyLoans": "还没有借用。请在表单里预约一笔。",
 	"search": "搜索",

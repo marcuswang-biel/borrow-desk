@@ -5,6 +5,7 @@ import * as DateTime from 'effect/DateTime';
 import * as Effect from 'effect/Effect';
 import { useMemo, useState, type MouseEvent, type SubmitEvent } from 'react';
 
+import { DateTimeField } from '@/components/date-time-field';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,7 +52,7 @@ import { useSession } from '../auth/index.ts';
 import { borrow, returnLoan } from '../lib/api.ts';
 import { run } from '../lib/client.ts';
 import { showFailure } from '../lib/error.ts';
-import { equipmentLabel, fieldValue, formatWhen, toMillis } from '../lib/text.ts';
+import { equipmentLabel, formatWhen } from '../lib/text.ts';
 import { m } from '../paraglide/messages.js';
 
 /** Loans shown on one page of the record. */
@@ -113,6 +114,8 @@ const LoansPage = () => {
 	const [pending, setPending] = useState(false);
 	const [returningId, setReturningId] = useState<string | undefined>(undefined);
 	const [pickedId, setPickedId] = useState<string | null>(null);
+	const [startsAt, setStartsAt] = useState<Date | undefined>(undefined);
+	const [endsAt, setEndsAt] = useState<Date | undefined>(undefined);
 	const [page, setPage] = useState(0);
 	const [query, setQuery] = useState('');
 	const [now] = useState(() => millis(DateTime.nowUnsafe()));
@@ -174,22 +177,22 @@ const LoansPage = () => {
 
 	const book = (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		if (pending || equipmentId === null) {
+		if (pending || equipmentId === null || startsAt === undefined || endsAt === undefined) {
 			return;
 		}
-		const form = event.currentTarget;
 		setLoanError('');
 		setPending(true);
 		void run(
 			borrow(
 				equipmentId,
-				DateTime.makeUnsafe(toMillis(fieldValue(form, 'startsAt'))),
-				DateTime.makeUnsafe(toMillis(fieldValue(form, 'endsAt'))),
+				DateTime.makeUnsafe(startsAt.getTime()),
+				DateTime.makeUnsafe(endsAt.getTime()),
 			).pipe(
 				Effect.andThen(refresh),
 				Effect.tap(() =>
 					Effect.sync(() => {
-						form.reset();
+						setStartsAt(undefined);
+						setEndsAt(undefined);
 					}),
 				),
 				showFailure(setLoanError),
@@ -248,30 +251,31 @@ const LoansPage = () => {
 										</SelectContent>
 									</Select>
 								</Field>
-								<Field data-invalid={invalid || undefined}>
-									<FieldLabel htmlFor="startsAt">{m.starts()}</FieldLabel>
-									<Input
-										aria-invalid={invalid}
-										id="startsAt"
-										name="startsAt"
-										required
-										type="datetime-local"
-									/>
-								</Field>
-								<Field data-invalid={invalid || undefined}>
-									<FieldLabel htmlFor="endsAt">{m.ends()}</FieldLabel>
-									<Input
-										aria-invalid={invalid}
-										id="endsAt"
-										name="endsAt"
-										required
-										type="datetime-local"
-									/>
-								</Field>
+								<DateTimeField
+									id="startsAt"
+									key={startsAt?.getTime() ?? 'starts'}
+									invalid={invalid}
+									label={m.starts()}
+									onChange={setStartsAt}
+									value={startsAt}
+								/>
+								<DateTimeField
+									id="endsAt"
+									key={endsAt?.getTime() ?? 'ends'}
+									invalid={invalid}
+									label={m.ends()}
+									onChange={setEndsAt}
+									value={endsAt}
+								/>
 								{invalid ? <FieldError>{loanError}</FieldError> : null}
 								<Button
 									aria-busy={pending}
-									disabled={pending || equipmentId === null}
+									disabled={
+										pending ||
+										equipmentId === null ||
+										startsAt === undefined ||
+										endsAt === undefined
+									}
 									type="submit"
 								>
 									{pending ? <Spinner data-icon="inline-start" /> : null}
