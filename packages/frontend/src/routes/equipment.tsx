@@ -25,7 +25,6 @@ import {
 } from '@/components/ui/table';
 
 import { useSession } from '../auth/index.ts';
-import { RequireSession } from '../components/require-session.tsx';
 import { createEquipment } from '../lib/api.ts';
 import { run } from '../lib/client.ts';
 import { showFailure } from '../lib/error.ts';
@@ -185,14 +184,7 @@ const EquipmentPage = () => {
 	);
 };
 
-/** Catalog route. A signed-out visitor goes back to sign-in. */
-const EquipmentRoute = () => (
-	<RequireSession>
-		<EquipmentPage />
-	</RequireSession>
-);
-
 /** Catalog page. An admin can record a kind and a number. */
 export const Route = createFileRoute('/equipment')({
-	component: EquipmentRoute,
+	component: EquipmentPage,
 });

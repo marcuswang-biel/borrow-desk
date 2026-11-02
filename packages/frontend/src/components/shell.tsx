@@ -77,7 +77,13 @@ const languageItems = [
 ] as const;
 
 /** Language menu. The list opens under the trigger and uses the trigger width. */
-const LanguageSelect = ({ className, wide = false }: { className?: string; wide?: boolean }) => {
+export const LanguageSelect = ({
+	className,
+	wide = false,
+}: {
+	className?: string;
+	wide?: boolean;
+}) => {
 	const language = getLocale();
 
 	return (

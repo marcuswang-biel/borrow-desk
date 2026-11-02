@@ -48,7 +48,6 @@ import {
 } from '@/components/ui/table';
 
 import { useSession } from '../auth/index.ts';
-import { RequireSession } from '../components/require-session.tsx';
 import { borrow, returnLoan } from '../lib/api.ts';
 import { run } from '../lib/client.ts';
 import { showFailure } from '../lib/error.ts';
@@ -460,14 +459,7 @@ const LoansPage = () => {
 	);
 };
 
-/** Loan route. A signed-out visitor goes back to sign-in. */
-const LoansRoute = () => (
-	<RequireSession>
-		<LoansPage />
-	</RequireSession>
-);
-
 /** Loan board. Overdue loans stay first, then the later start. */
 export const Route = createFileRoute('/loans')({
-	component: LoansRoute,
+	component: LoansPage,
 });
