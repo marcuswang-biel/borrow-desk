@@ -4,6 +4,7 @@ import {
 	EquipmentNotFound,
 	Forbidden,
 	LoanConflict,
+	ReminderNotFound,
 	type User,
 } from '@borrow-desk/api';
 import { assert, it } from '@effect/vitest';
@@ -204,5 +205,39 @@ it.effect('a borrower sees only their own reminder', () =>
 		assert.strictEqual(mine[0]?.equipmentName, 'Camera');
 		assert.strictEqual(mine[0]?.equipmentCode, '1');
 		assert.strictEqual(others.length, 0);
+	}).pipe(Effect.provide(services)),
+);
+
+it.effect('a borrower can mark their own reminder read once', () =>
+	Effect.gen(function* () {
+		const equipment = yield* EquipmentService;
+		const loans = yield* LoansService;
+		const reminders = yield* RemindersService;
+		const camera = yield* equipment
+			.create({ name: 'Camera', code: '1' })
+			.pipe(Effect.provideService(CurrentUser, admin));
+		yield* loans
+			.borrow({ equipmentId: camera.id, startsAt: at(0), endsAt: at(1_000) })
+			.pipe(Effect.provideService(CurrentUser, ada));
+		yield* TestClock.setTime(2_000);
+		yield* scanOverdue();
+		const [unread] = yield* reminders.list().pipe(Effect.provideService(CurrentUser, ada));
+		assert.strictEqual(unread?.readAt, null);
+		const loanId = unread?.loanId ?? '';
+		const read = yield* reminders.markRead(loanId).pipe(Effect.provideService(CurrentUser, ada));
+		const again = yield* reminders.markRead(loanId).pipe(Effect.provideService(CurrentUser, ada));
+		assert.notStrictEqual(read.readAt, null);
+		assert.strictEqual(
+			again.readAt === null ? null : DateTime.toEpochMillis(again.readAt),
+			read.readAt === null ? null : DateTime.toEpochMillis(read.readAt),
+		);
+		const missing = yield* reminders
+			.markRead('missing')
+			.pipe(Effect.provideService(CurrentUser, ada), Effect.flip);
+		assert.instanceOf(missing, ReminderNotFound);
+		const foreign = yield* reminders
+			.markRead(loanId)
+			.pipe(Effect.provideService(CurrentUser, bob), Effect.flip);
+		assert.instanceOf(foreign, ReminderNotFound);
 	}).pipe(Effect.provide(services)),
 );

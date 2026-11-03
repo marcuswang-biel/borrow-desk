@@ -1,4 +1,10 @@
-import type { EquipmentError, LoanError, ReminderNotice, UserError } from '@borrow-desk/api';
+import type {
+	EquipmentError,
+	LoanError,
+	ReminderError,
+	ReminderNotice,
+	UserError,
+} from '@borrow-desk/api';
 import type * as HttpClientError from 'effect/http/HttpClientError';
 import type * as Schema from 'effect/Schema';
 
@@ -12,6 +18,7 @@ import { formatWhen } from './text.ts';
 export type DeskError =
 	| EquipmentError
 	| LoanError
+	| ReminderError
 	| UserError
 	| HttpClientError.HttpClientError
 	| Schema.SchemaError;
@@ -66,6 +73,7 @@ export const shown = (error: DeskError) =>
 			}),
 		),
 		Match.tag('LoanNotFound', () => m.loanMissing()),
+		Match.tag('ReminderNotFound', () => m.reminderNotFound()),
 		Match.tag('Unauthorized', () => m.requestFailed()),
 		Match.tag('HttpClientError', () => m.requestFailed()),
 		Match.tag('SchemaError', () => m.requestFailed()),

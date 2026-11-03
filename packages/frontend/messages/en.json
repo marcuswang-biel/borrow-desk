@@ -78,6 +78,7 @@
 	"endAfterStart": "The end must be after the start.",
 	"equipmentMissing": "That equipment does not exist.",
 	"loanMissing": "That loan does not exist.",
+	"reminderNotFound": "That reminder does not exist.",
 	"returnOwnLoan": "You can only return your own loan.",
 	"adminOnly": "Only an admin can record equipment.",
 	"equipmentNameEmpty": "Enter an equipment name.",

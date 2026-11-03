@@ -10,6 +10,8 @@ export const RemindersHttpLive = HttpApiBuilder.group(
 	'reminders',
 	Effect.fn('RemindersHttpLive')(function* (handlers) {
 		const reminders = yield* RemindersService;
-		return handlers.handle('listReminders', () => reminders.list());
+		return handlers
+			.handle('listReminders', () => reminders.list())
+			.handle('readReminder', ({ params }) => reminders.markRead(params.loanId));
 	}),
 );

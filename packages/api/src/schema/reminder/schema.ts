@@ -10,4 +10,5 @@ export class ReminderNotice extends Schema.Class<ReminderNotice>('ReminderNotice
 	equipmentName: Schema.NullOr(Schema.String),
 	equipmentCode: Schema.NullOr(Schema.String),
 	sentAt: Instant,
+	readAt: Schema.NullOr(Instant),
 }) {}

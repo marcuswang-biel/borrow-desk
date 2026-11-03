@@ -13,9 +13,10 @@ export {
 	LoanConflict,
 	LoanNotFound,
 	ReminderNotice,
+	ReminderNotFound,
 	Role,
 	Unauthorized,
 	User,
 } from './schema/index.ts';
-export type { EquipmentError, LoanError, UserError } from './schema/index.ts';
+export type { EquipmentError, LoanError, ReminderError, UserError } from './schema/index.ts';
 export { rangesOverlap } from './policy/index.ts';

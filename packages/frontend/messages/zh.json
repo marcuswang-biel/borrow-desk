@@ -75,6 +75,7 @@
 	"endAfterStart": "结束时间必须晚于开始时间。",
 	"equipmentMissing": "没有这件设备。",
 	"loanMissing": "没有这笔借用。",
+	"reminderNotFound": "没有这条提醒。",
 	"returnOwnLoan": "只能归还自己的借用。",
 	"adminOnly": "只有管理员可以登记设备。",
 	"equipmentNameEmpty": "请填写设备名。",

@@ -51,9 +51,11 @@ import {
 	formatWhen,
 	getLocale,
 	listReminders,
+	readReminder,
 	localeTag,
 	roleLabel,
 	run,
+	showFailure,
 	shown,
 	shownReminder,
 	type DeskError,
@@ -128,6 +130,7 @@ const DeskFrame = () => {
 	const [remindersOpen, setRemindersOpen] = useState(false);
 	const [reminderError, setReminderError] = useState('');
 	const [opening, setOpening] = useState(false);
+	const [readingId, setReadingId] = useState<string | undefined>(undefined);
 	const [signOutError, setSignOutError] = useState('');
 	const [signingOut, setSigningOut] = useState(false);
 
@@ -165,6 +168,34 @@ const DeskFrame = () => {
 		);
 	};
 
+	const markRead = (loanId: string) => {
+		if (
+			readingId !== undefined ||
+			reminders.some((notice) => notice.loanId === loanId && notice.readAt !== null)
+		) {
+			return;
+		}
+		setReadingId(loanId);
+		setReminderError('');
+		void run(
+			readReminder(loanId).pipe(
+				Effect.tap((next) =>
+					Effect.sync(() => {
+						replaceReminders(
+							reminders.map((notice) => (notice.loanId === next.loanId ? next : notice)),
+						);
+					}),
+				),
+				showFailure(setReminderError),
+				Effect.ensuring(
+					Effect.sync(() => {
+						setReadingId(undefined);
+					}),
+				),
+			),
+		);
+	};
+
 	const leave = () => {
 		if (signingOut) {
 			return;
@@ -194,6 +225,7 @@ const DeskFrame = () => {
 		);
 	};
 
+	const unreadCount = reminders.filter((notice) => notice.readAt === null).length;
 	const home = status === 'signed-in' ? '/equipment' : '/';
 	const brand = status === 'signed-in' ? <Link to="/equipment" /> : <Link to="/" />;
 
@@ -287,7 +319,7 @@ const DeskFrame = () => {
 							<Button
 								aria-busy={opening}
 								aria-expanded={remindersOpen}
-								aria-label={m.remindersCount({ count: reminders.length })}
+								aria-label={m.remindersCount({ count: unreadCount })}
 								className="relative"
 								disabled={opening}
 								onClick={openReminders}
@@ -300,13 +332,13 @@ const DeskFrame = () => {
 								) : (
 									<BellIcon data-icon="inline-start" />
 								)}
-								{reminders.length > 0 ? (
+								{unreadCount > 0 ? (
 									<Badge
 										aria-hidden="true"
 										className="bg-destructive dark:bg-destructive absolute -top-1 -right-1 h-4 min-w-4 rounded-full px-1 py-0 text-[10px] leading-none text-white tabular-nums dark:text-white"
 										variant="destructive"
 									>
-										{reminderBadgeCount(reminders.length)}
+										{reminderBadgeCount(unreadCount)}
 									</Badge>
 								) : null}
 							</Button>
@@ -339,7 +371,25 @@ const DeskFrame = () => {
 								{reminders.map((notice, index) => (
 									<div className="flex flex-col" key={notice.loanId}>
 										{index > 0 ? <ItemSeparator /> : null}
-										<Item size="sm" variant="muted">
+										<Item
+											className="text-left"
+											size="sm"
+											variant={notice.readAt === null ? 'outline' : 'muted'}
+											{...(notice.readAt === null
+												? {
+														onClick: () => {
+															markRead(notice.loanId);
+														},
+														render: (
+															<button
+																aria-busy={readingId === notice.loanId}
+																disabled={readingId === notice.loanId}
+																type="button"
+															/>
+														),
+													}
+												: {})}
+										>
 											<ItemContent>
 												<ItemTitle>{shownReminder(notice)}</ItemTitle>
 												<ItemDescription>{formatWhen(notice.sentAt)}</ItemDescription>

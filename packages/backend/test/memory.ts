@@ -1,4 +1,4 @@
-import { Loan, type Equipment, type ReminderNotice } from '@borrow-desk/api';
+import { Loan, ReminderNotice, type Equipment } from '@borrow-desk/api';
 import { rangesOverlap } from '@borrow-desk/api';
 import * as DateTime from 'effect/DateTime';
 import * as Effect from 'effect/Effect';
@@ -83,6 +83,28 @@ export const ReminderMemory = Layer.effect(
 					current.some((item) => item.loanId === notice.loanId) ? current : [...current, notice],
 				),
 			list: () => Ref.get(sent),
+			markRead: (loanId, userId, readAt) =>
+				Ref.modify(sent, (current) => {
+					const index = current.findIndex(
+						(item) => item.loanId === loanId && item.userId === userId,
+					);
+					const item = index < 0 ? undefined : current[index];
+					if (item === undefined || item.readAt !== null) {
+						return [item, current];
+					}
+					const next = current.slice();
+					const read = new ReminderNotice({
+						loanId: item.loanId,
+						userId: item.userId,
+						borrowerName: item.borrowerName,
+						equipmentName: item.equipmentName,
+						equipmentCode: item.equipmentCode,
+						sentAt: item.sentAt,
+						readAt,
+					});
+					next[index] = read;
+					return [read, next];
+				}),
 		});
 	}),
 );

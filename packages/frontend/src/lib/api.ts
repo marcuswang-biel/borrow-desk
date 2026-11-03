@@ -36,6 +36,10 @@ export const borrow = (equipmentId: string, startsAt: DateTime.Utc, endsAt: Date
 /** Loads reminders sent to the signed-in borrower. */
 export const listReminders = Effect.flatMap(desk, (api) => api.reminders.listReminders());
 
+/** Marks one of the signed-in borrower's reminders read. */
+export const readReminder = (loanId: string) =>
+	Effect.flatMap(desk, (api) => api.reminders.readReminder({ params: { loanId } }));
+
 /** Marks a loan returned. */
 export const returnLoan = (id: string) =>
 	Effect.flatMap(desk, (api) => api.loans.returnLoan({ params: { id } }));

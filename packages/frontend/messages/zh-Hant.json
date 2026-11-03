@@ -75,6 +75,7 @@
 	"endAfterStart": "結束時間必須晚於開始時間。",
 	"equipmentMissing": "沒有這件設備。",
 	"loanMissing": "沒有這筆借用。",
+	"reminderNotFound": "沒有這則提醒。",
 	"returnOwnLoan": "只能歸還自己的借用。",
 	"adminOnly": "只有管理員可以登記設備。",
 	"equipmentNameEmpty": "請填寫設備名。",

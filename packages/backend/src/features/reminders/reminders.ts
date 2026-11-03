@@ -1,4 +1,4 @@
-import { CurrentUser, ReminderNotice } from '@borrow-desk/api';
+import { CurrentUser, ReminderNotice, ReminderNotFound } from '@borrow-desk/api';
 import * as Cause from 'effect/Cause';
 import * as Context from 'effect/Context';
 import * as DateTime from 'effect/DateTime';
@@ -15,6 +15,9 @@ export class RemindersService extends Context.Service<
 	RemindersService,
 	{
 		readonly list: () => Effect.Effect<ReadonlyArray<ReminderNotice>, never, CurrentUser>;
+		readonly markRead: (
+			loanId: string,
+		) => Effect.Effect<ReminderNotice, ReminderNotFound, CurrentUser>;
 	}
 >()('borrow-desk/features/reminders/RemindersService') {}
 
@@ -27,7 +30,16 @@ export const RemindersLive = Layer.effect(
 			const user = yield* CurrentUser;
 			return noticesFor(user, yield* reminder.list());
 		});
-		return RemindersService.of({ list });
+		const markRead = Effect.fn('RemindersService.markRead')(function* (loanId: string) {
+			const user = yield* CurrentUser;
+			const readAt = yield* DateTime.now;
+			const notice = yield* reminder.markRead(loanId, user.id, readAt);
+			if (notice === undefined) {
+				return yield* new ReminderNotFound({ message: 'That reminder does not exist' });
+			}
+			return notice;
+		});
+		return RemindersService.of({ list, markRead });
 	}),
 );
 
@@ -48,6 +60,7 @@ export const scanOverdue = Effect.fn('scanOverdue')(function* () {
 				equipmentName: item === undefined ? null : item.name,
 				equipmentCode: item === undefined ? null : item.code,
 				sentAt: now,
+				readAt: null,
 			}),
 		);
 	}
