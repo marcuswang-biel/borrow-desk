@@ -9,6 +9,9 @@ import * as HttpServerResponse from 'effect/http/HttpServerResponse';
 import * as Layer from 'effect/Layer';
 import * as Redacted from 'effect/Redacted';
 import { Pool } from 'pg';
+import { Resend } from 'resend';
+
+import { sendActivationEmail } from './activation-mail.ts';
 
 /** Better Auth base path. The Vite dev server proxies this prefix to the API. */
 const authPath = '/api/auth';
@@ -36,6 +39,16 @@ export const BetterAuthLive = Layer.unwrap(
 		if (secret.length < 16) {
 			return yield* Effect.die(new Error('production requires BETTER_AUTH_SECRET'));
 		}
+		const resendKey = Redacted.value(
+			yield* Config.Redacted('RESEND_API_KEY').pipe(Config.withDefault(Redacted.make(''))),
+		);
+		const resendFrom = yield* Config.String('RESEND_FROM').pipe(Config.withDefault(''));
+		if (appEnv === 'production' && (resendKey.length === 0 || resendFrom.length === 0)) {
+			return yield* Effect.die(new Error('production requires RESEND_API_KEY and RESEND_FROM'));
+		}
+		if (resendKey.length > 0 && resendFrom.length === 0) {
+			return yield* Effect.die(new Error('RESEND_FROM is required to send activation mail'));
+		}
 		const auth = betterAuth({
 			database: new Pool({
 				connectionString: databaseUrl,
@@ -46,7 +59,19 @@ export const BetterAuthLive = Layer.unwrap(
 			basePath: authPath,
 			secret,
 			trustedOrigins: [origin],
-			emailAndPassword: { enabled: true },
+			emailAndPassword: {
+				enabled: true,
+				requireEmailVerification: true,
+			},
+			emailVerification: {
+				sendOnSignUp: true,
+				sendOnSignIn: true,
+				autoSignInAfterVerification: true,
+				sendVerificationEmail: sendActivationEmail(
+					resendKey.length === 0 ? undefined : new Resend(resendKey),
+					resendFrom,
+				),
+			},
 			plugins: [jwt()],
 		});
 		const migrations = yield* Effect.tryPromise(() => getMigrations(auth.options)).pipe(

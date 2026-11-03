@@ -1,9 +1,13 @@
 import { createRootRoute } from '@tanstack/react-router';
+import * as Effect from 'effect/Effect';
 
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 
 import { SessionProvider, SignInPanel, useSession } from '../auth/index.ts';
 import { LanguageSelect, Shell } from '../components/shell.tsx';
+import { run } from '../lib/client.ts';
 import { m } from '../paraglide/messages.js';
 import { MissingPage } from './miss.tsx';
 
@@ -14,9 +18,31 @@ const SessionPending = () => (
 	</div>
 );
 
+/** Session exists, but the desk could not be loaded. This is not a signed-out page. */
+const DeskUnavailable = ({ message }: { message: string }) => {
+	const { refresh } = useSession();
+	return (
+		<Card className="w-full max-w-md">
+			<CardHeader>
+				<CardTitle>{message}</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<Button
+					onClick={() => {
+						void run(refresh.pipe(Effect.catch(() => Effect.void)));
+					}}
+					type="button"
+				>
+					{m.tryAgain()}
+				</Button>
+			</CardContent>
+		</Card>
+	);
+};
+
 /** Root gate. The session check and the account form stay here. Desk pages render only after sign-in. */
 const AccountGate = () => {
-	const { status } = useSession();
+	const { loadError, status } = useSession();
 	if (status === 'signed-in') {
 		return <Shell />;
 	}
@@ -27,7 +53,13 @@ const AccountGate = () => {
 				<LanguageSelect />
 			</header>
 			<div className="flex flex-1 items-center justify-center p-4">
-				{status === 'loading' ? <SessionPending /> : <SignInPanel />}
+				{status === 'loading' ? (
+					<SessionPending />
+				) : status === 'unavailable' ? (
+					<DeskUnavailable message={loadError ?? m.requestFailed()} />
+				) : (
+					<SignInPanel />
+				)}
 			</div>
 		</div>
 	);

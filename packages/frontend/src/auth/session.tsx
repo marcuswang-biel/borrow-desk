@@ -17,11 +17,13 @@ import type { DeskError } from '../lib/error.ts';
 
 import { loadDesk } from '../lib/api.ts';
 import { authedClient } from '../lib/client.ts';
+import { shown } from '../lib/error.ts';
 import { sessionToken, signOut as endSession } from './auth-client.ts';
 
 /** Signed-in desk, or the fact that the session is still unknown. */
 export type Session = {
-	status: 'loading' | 'anonymous' | 'signed-in';
+	status: 'loading' | 'anonymous' | 'unavailable' | 'signed-in';
+	loadError: string | undefined;
 	user: User | undefined;
 	equipment: ReadonlyArray<Equipment>;
 	loans: ReadonlyArray<Loan>;
@@ -46,6 +48,7 @@ export const useSession = () => {
 /** Loads the signed-in desk once, then again after sign-in. */
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
 	const [status, setStatus] = useState<Session['status']>('loading');
+	const [loadError, setLoadError] = useState<string | undefined>(undefined);
 	const [user, setUser] = useState<User | undefined>(undefined);
 	const [equipment, setEquipment] = useState<ReadonlyArray<Equipment>>([]);
 	const [loans, setLoans] = useState<ReadonlyArray<Loan>>([]);
@@ -60,7 +63,14 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 						setEquipment(nextEquipment);
 						setLoans(nextLoans);
 						setReminders(nextReminders);
+						setLoadError(undefined);
 						setStatus('signed-in');
+					}),
+				),
+				Effect.tapError((error) =>
+					Effect.sync(() => {
+						setLoadError(shown(error));
+						setStatus('unavailable');
 					}),
 				),
 			),
@@ -76,6 +86,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 						setEquipment([]);
 						setLoans([]);
 						setReminders([]);
+						setLoadError(undefined);
 						setStatus('anonymous');
 					}),
 				),
@@ -93,7 +104,12 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 				Effect.flatMap((token) =>
 					token === undefined ? Effect.sync(() => setStatus('anonymous')) : refresh,
 				),
-				Effect.catch(() => Effect.sync(() => setStatus('anonymous'))),
+				Effect.catch((error) =>
+					Effect.sync(() => {
+						setLoadError(shown(error));
+						setStatus('unavailable');
+					}),
+				),
 				Effect.provide(authedClient),
 			),
 		);
@@ -105,6 +121,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 	const value = useMemo<Session>(
 		() => ({
 			status,
+			loadError,
 			user,
 			equipment,
 			loans,
@@ -113,7 +130,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 			signOut,
 			replaceReminders,
 		}),
-		[status, user, equipment, loans, reminders, refresh, signOut, replaceReminders],
+		[status, loadError, user, equipment, loans, reminders, refresh, signOut, replaceReminders],
 	);
 
 	return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

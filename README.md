@@ -7,14 +7,15 @@ An admin records a piece of equipment. An employee books it for a time range. If
 1. Install pnpm 12 and Node 24.
 2. `pnpm setup`. It writes `.env.development` and `.env.production` from `.env.example`, keeps values already present, and creates the local `borrow_desk` database.
 3. Set `ADMIN_EMAIL` to the admin addresses, separated by commas. The example uses `ada@example.com,bob@example.com`. Every other account is an employee.
-4. `pnpm install`
-5. `pnpm dev`
+4. Set `RESEND_API_KEY` and `RESEND_FROM`. Sign-up and an unactivated sign-in send one activation link. The account cannot use the desk until that link is opened. Without a key, development prints the link in the API log. `Borrow Desk <onboarding@resend.dev>` delivers only to the address on the Resend account.
+5. `pnpm install`
+6. `pnpm dev`
 
 That one command starts the API at http://localhost:3000 and the page at http://localhost:5173. Migrations run when the API starts, including the Better Auth tables.
 
 ## Production
 
-Production uses a separate Neon pooled database and `AUTH_PUBLIC_URL` of the deployed site. Set `BETTER_AUTH_SECRET` and `CRON_SECRET` there. Do not point `.env.development` at Neon.
+Production uses a separate Neon pooled database and `AUTH_PUBLIC_URL` of the deployed site. Set `BETTER_AUTH_SECRET`, `CRON_SECRET`, `RESEND_API_KEY`, and `RESEND_FROM` there. The from address must use a domain verified in Resend. The process refuses to start when either Resend value is missing. Do not point `.env.development` at Neon.
 
 The page and the API deploy together on Vercel. The long-running `pnpm dev` process runs the one-minute reminder `Schedule`. A Vercel function does not keep that fiber alive, so the API also exposes `GET /api/internal/overdue`, protected by `CRON_SECRET`. Vercel calls it daily with its built-in cron; for the original one-minute cadence, point an external scheduler such as cron-job.org, Upstash QStash, or a Cloudflare Worker cron at the same path with `Authorization: Bearer $CRON_SECRET`.
 

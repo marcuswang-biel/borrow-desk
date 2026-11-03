@@ -11,6 +11,7 @@ const Claims = Schema.Struct({
 	sub: Schema.String,
 	email: Schema.String,
 	name: Schema.String,
+	emailVerified: Schema.Boolean,
 });
 
 /** Public origin Better Auth prints into the token, and the browser uses for cookies. */
@@ -66,6 +67,9 @@ export const AuthenticationLive = Layer.effect(
 							() => new Unauthorized({ message: 'Bearer token is missing identity claims' }),
 						),
 					);
+					if (!claims.emailVerified) {
+						return yield* new Unauthorized({ message: 'Email is not activated' });
+					}
 					return yield* Effect.provideService(httpEffect, CurrentUser, {
 						id: claims.sub,
 						email: claims.email,

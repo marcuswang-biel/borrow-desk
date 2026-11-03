@@ -6,7 +6,10 @@ import * as HttpApiClient from 'effect/http-api/HttpApiClient';
 /** Typed client for the shared HTTP contract. */
 const desk = HttpApiClient.make(Api, { baseUrl: window.location.origin });
 
-/** Loads the signed-in person, the catalog, the loans, and that person's reminders. */
+/**
+ * Loads the signed-in person, the catalog, the loans, and that person's reminders.
+ * One at a time: production keeps a single database connection.
+ */
 export const loadDesk = Effect.flatMap(desk, (api) =>
 	Effect.all(
 		[
@@ -15,7 +18,7 @@ export const loadDesk = Effect.flatMap(desk, (api) =>
 			api.loans.listLoans(),
 			api.reminders.listReminders(),
 		],
-		{ concurrency: 'unbounded' },
+		{ concurrency: 1 },
 	),
 );
 

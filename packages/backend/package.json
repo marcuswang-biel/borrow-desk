@@ -14,7 +14,8 @@
 		"better-auth": "catalog:",
 		"effect": "catalog:",
 		"jose": "catalog:",
-		"pg": "catalog:"
+		"pg": "catalog:",
+		"resend": "^6.37.0"
 	},
 	"devDependencies": {
 		"@effect/vitest": "catalog:",

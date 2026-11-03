@@ -1,6 +1,6 @@
 # Borrow Desk
 
-Borrow Desk is the desk where people book shared equipment for a stretch of time. Admins put equipment on the catalog. Anyone signed in can book it, as long as nobody else already has it for that stretch.
+Borrow Desk is the desk where people book shared equipment for a stretch of time. Admins put equipment on the catalog. Anyone with an activated account can book it, as long as nobody else already has it for that stretch.
 
 ## Equipment
 
@@ -17,6 +17,10 @@ Two open loans of the same equipment whose ranges overlap. The failure names the
 ## Reminder
 
 A note sent once to the borrower after the end instant, if the loan is still open. Sending it again does not create a second note.
+
+## Account
+
+A person who has signed up. Sign-up sends one activation link to their email. Until they open that link, they are not signed in and cannot book or record equipment. Trying to sign in before that sends the link again.
 
 ## Admin
 
